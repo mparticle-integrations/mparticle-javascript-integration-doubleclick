@@ -304,39 +304,38 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
 
 },{"../../../src/commerce-handler":2,"../../../src/event-handler":4,"../../../src/identity-handler":5,"../../../src/initialization":6,"../../../src/session-handler":7,"../../../src/user-attribute-handler":8}],2:[function(require,module,exports){
 var common = require('./common'),
-    TRANSACTIONS = 'transactions',
+    salesCounterTypes = {
+        transactions: 1,
+        items_sold: 1
+    },
     ITEMS_SOLD = 'items_sold';
 
 var commerceHandler = {
     logCommerceEvent: function(event) {
-        if (event.EventDataType === 16) {
+        if (event.EventDataType === mParticle.CommerceEventType.ProductPurchase) {
+            var counter = event.CustomFlags['DoubleClick.Counter'];
+            if (!counter) {
+                console.log('Event not sent. Sales conversions requires a custom flag of DoubleClick.Counter equal to \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
+                return;
+            } else if (!salesCounterTypes[counter]) {
+                console.log('Counter type not valid. For sales conversions, use a custom flag of DoubleClick.Counter equal to \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
+                return;
+            }
+
             var eventMapping = common.getEventMapping(event);
             if (eventMapping && eventMapping.result && eventMapping.match) {
                 var gtagProperties = {};
                 common.setCustomVariables(event, gtagProperties);
                 common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
-                if (event.CustomFlags && event.CustomFlags['DoubleClick.Counter']) {
-                    gtagProperties.send_to += ('+' + event.CustomFlags['DoubleClick.Counter']);
-                    //stringify number
-                    gtagProperties.value = '' + event.ProductAction.TotalAmount;
-                    gtagProperties.transaction_id = event.ProductAction.TransactionId;
+                gtagProperties.send_to += ('+' + event.CustomFlags['DoubleClick.Counter']);
+                //stringify number
+                gtagProperties.value = '' + event.ProductAction.TotalAmount;
+                gtagProperties.transaction_id = event.ProductAction.TransactionId;
 
-                    if (event.CustomFlags['DoubleClick.Counter'] === TRANSACTIONS) {
-                        common.sendGtag('purchase', gtagProperties);
-                    } else if (event.CustomFlags['DoubleClick.Counter'] === ITEMS_SOLD) {
-                        //stringify number
-                        gtagProperties.quantity = '' + event.ProductAction.ProductList.length;
-
-                        common.sendGtag('purchase', gtagProperties);
-                    } else {
-                        console.log('Counter type not valid. For sales conversions, use \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                        return false;
-                    }
-                } else {
-                    console.log('Counter type not valid. For sales conversions, use \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                    return false;
+                if (counter === ITEMS_SOLD) {
+                    gtagProperties.quantity = '' + event.ProductAction.ProductList.length;
                 }
-                window.gtag('event', 'purchase', gtagProperties);
+                common.sendGtag('purchase', gtagProperties);
             } else {
                 console.log('Event not mapped. Event not sent.');
                 return false;
@@ -369,8 +368,14 @@ module.exports = {
         var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, event.EventName);
         return findValueInMapping(jsHash, this.eventMapping);
     },
-    sendGtag: function(type, properties) {
-        window.gtag('event', type, properties);
+    sendGtag: function(type, properties, isInitialization) {
+        if (Array.isArray(window.dataLayer)) {
+            if (initialization) {
+                window.dataLayer.push([type, properties]);
+            } else {
+                window.dataLayer.push(['event', type, properties]);
+            }
+        }
     }
 };
 
@@ -502,9 +507,6 @@ var initialization = {
     name: 'DoubleclickDFP',
     initForwarder: function(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized) {
         common.settings = settings;
-        window.gtag = function() {
-            window.dataLayer.push(arguments);
-        };
 
         window.dataLayer = window.dataLayer || [];
         if (!testMode) {
@@ -520,7 +522,7 @@ var initialization = {
 
                 initializeGoogleDFP(settings);
 
-                if (window.gtag && eventQueue.length > 0) {
+                if (eventQueue.length > 0) {
                     // Process any events that may have been queued up while forwarder was being initialized.
                     for (var i = 0; i < eventQueue.length; i++) {
                         processEvent(eventQueue[i]);
@@ -530,22 +532,22 @@ var initialization = {
                 }
             };
         } else {
-            isInitialized = true;
-            initializeGoogleDFP(settings);
+            initializeGoogleDFP(settings, isInitialized);
         }
     }
 };
 
-function initializeGoogleDFP(settings) {
+function initializeGoogleDFP(settings, isInitialized) {
     common.eventMapping = JSON.parse(settings.eventMapping.replace(/&quot;/g, '\"'));
 
     common.customVariablesMappings = JSON.parse(settings.customVariables.replace(/&quot;/g, '\"')).reduce(function(a, b) {
         a[b.map] = b.value;
         return a;
     }, {});
-    window.gtag('js', new Date());
-    window.gtag('allow_custom_scripts', true);
-    window.gtag('config', settings.advertiserId);
+    common.sendGtag('js', new Date(), true);
+    common.sendGtag('allow_custom_scripts', true, true);
+    common.sendGtag('config', settings.advertiserId, true);
+    isInitialized = true;
 }
 
 module.exports = initialization;

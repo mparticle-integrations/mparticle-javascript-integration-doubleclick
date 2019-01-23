@@ -19,9 +19,13 @@ module.exports = {
         var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, event.EventName);
         return findValueInMapping(jsHash, this.eventMapping);
     },
-    sendGtag: function(type, properties) {
+    sendGtag: function(type, properties, isInitialization) {
         if (Array.isArray(window.dataLayer)) {
-            window.dataLayer.push(['event', type, properties]);
+            if (initialization) {
+                window.dataLayer.push([type, properties]);
+            } else {
+                window.dataLayer.push(['event', type, properties]);
+            }
         }
     }
 };

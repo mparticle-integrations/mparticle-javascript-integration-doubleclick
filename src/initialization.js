@@ -19,7 +19,7 @@ var initialization = {
 
                 initializeGoogleDFP(settings);
 
-                if (window.gtag && eventQueue.length > 0) {
+                if (eventQueue.length > 0) {
                     // Process any events that may have been queued up while forwarder was being initialized.
                     for (var i = 0; i < eventQueue.length; i++) {
                         processEvent(eventQueue[i]);
@@ -29,22 +29,22 @@ var initialization = {
                 }
             };
         } else {
-            isInitialized = true;
-            initializeGoogleDFP(settings);
+            initializeGoogleDFP(settings, isInitialized);
         }
     }
 };
 
-function initializeGoogleDFP(settings) {
+function initializeGoogleDFP(settings, isInitialized) {
     common.eventMapping = JSON.parse(settings.eventMapping.replace(/&quot;/g, '\"'));
 
     common.customVariablesMappings = JSON.parse(settings.customVariables.replace(/&quot;/g, '\"')).reduce(function(a, b) {
         a[b.map] = b.value;
         return a;
     }, {});
-    window.gtag('js', new Date());
-    window.gtag('allow_custom_scripts', true);
-    window.gtag('config', settings.advertiserId);
+    common.sendGtag('js', new Date(), true);
+    common.sendGtag('allow_custom_scripts', true, true);
+    common.sendGtag('config', settings.advertiserId, true);
+    isInitialized = true;
 }
 
 module.exports = initialization;
