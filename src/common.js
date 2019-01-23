@@ -21,7 +21,7 @@ module.exports = {
     },
     sendGtag: function(type, properties, isInitialization) {
         if (Array.isArray(window.dataLayer)) {
-            if (initialization) {
+            if (isInitialization) {
                 window.dataLayer.push([type, properties]);
             } else {
                 window.dataLayer.push(['event', type, properties]);

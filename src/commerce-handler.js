@@ -8,13 +8,13 @@ var common = require('./common'),
 var commerceHandler = {
     logCommerceEvent: function(event) {
         if (event.EventDataType === mParticle.CommerceEventType.ProductPurchase) {
-            var counter = event.CustomFlags['DoubleClick.Counter'];
+            var counter = event.CustomFlags && event.CustomFlags['DoubleClick.Counter'] ? event.CustomFlags['DoubleClick.Counter'] : null;
             if (!counter) {
                 console.log('Event not sent. Sales conversions requires a custom flag of DoubleClick.Counter equal to \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                return;
+                return false;
             } else if (!salesCounterTypes[counter]) {
                 console.log('Counter type not valid. For sales conversions, use a custom flag of DoubleClick.Counter equal to \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                return;
+                return false;
             }
 
             var eventMapping = common.getEventMapping(event);
@@ -22,7 +22,7 @@ var commerceHandler = {
                 var gtagProperties = {};
                 common.setCustomVariables(event, gtagProperties);
                 common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
-                gtagProperties.send_to += ('+' + event.CustomFlags['DoubleClick.Counter']);
+                gtagProperties.send_to += ('+' + counter);
                 //stringify number
                 gtagProperties.value = '' + event.ProductAction.TotalAmount;
                 gtagProperties.transaction_id = event.ProductAction.TransactionId;

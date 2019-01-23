@@ -210,6 +210,7 @@ describe('DoubleClick', function () {
 
     it('should not log an event that has no custom flag, or an incorrect custom flag', function(done) {
         window.dataLayer = [];
+
         mParticle.forwarder.process({
             EventDataType: MessageTypes.PageEvent,
             EventCategory: mParticle.EventType.Unknown,
@@ -332,6 +333,95 @@ describe('DoubleClick', function () {
         window.dataLayer[0][2].should.have.property('value', '850');
         window.dataLayer[0][2].should.have.property('transaction_id', 'tid123');
         window.dataLayer[0][2].should.have.property('quantity', '2');
+
+        done();
+    });
+
+    it('should not log a product purchase commerce event without a custom flag or with an incorrect custom flag', function(done) {
+        window.dataLayer = [];
+
+        mParticle.forwarder.process({
+            EventName: 'eCommerce - Purchase',
+            EventDataType: MessageTypes.Commerce,
+            EventCategory: mParticle.CommerceEventType.ProductPurchase,
+            ProductAction: {
+                ProductActionType: mParticle.ProductActionType.Purchase,
+                ProductList: [
+                    {
+                        Sku: '12345',
+                        Name: 'iPhone 6',
+                        Category: 'Phones',
+                        Brand: 'iPhone',
+                        Variant: '6',
+                        Price: 400,
+                        TotalAmount: 400,
+                        CouponCode: 'coupon-code',
+                        Quantity: 1
+                    },
+                    {
+                        Sku: '12345',
+                        Name: 'iPhone 6',
+                        Category: 'Phones',
+                        Brand: 'iPhone',
+                        Variant: '6',
+                        Price: 400,
+                        TotalAmount: 400,
+                        CouponCode: 'coupon-code',
+                        Quantity: 1
+                    }
+                ],
+                TransactionId: 'tid123',
+                Affiliation: 'my-affiliation',
+                TotalAmount: 850,
+                TaxAmount: 40,
+                ShippingAmount: 10,
+                CouponCode: null
+            },
+            CustomFlags: {
+                'DoubleClick.Counter': 'invalidCounter'
+            }
+        });
+
+        mParticle.forwarder.process({
+            EventName: 'eCommerce - Purchase',
+            EventDataType: MessageTypes.Commerce,
+            EventCategory: mParticle.CommerceEventType.ProductPurchase,
+            ProductAction: {
+                ProductActionType: mParticle.ProductActionType.Purchase,
+                ProductList: [
+                    {
+                        Sku: '12345',
+                        Name: 'iPhone 6',
+                        Category: 'Phones',
+                        Brand: 'iPhone',
+                        Variant: '6',
+                        Price: 400,
+                        TotalAmount: 400,
+                        CouponCode: 'coupon-code',
+                        Quantity: 1
+                    },
+                    {
+                        Sku: '12345',
+                        Name: 'iPhone 6',
+                        Category: 'Phones',
+                        Brand: 'iPhone',
+                        Variant: '6',
+                        Price: 400,
+                        TotalAmount: 400,
+                        CouponCode: 'coupon-code',
+                        Quantity: 1
+                    }
+                ],
+                TransactionId: 'tid123',
+                Affiliation: 'my-affiliation',
+                TotalAmount: 850,
+                TaxAmount: 40,
+                ShippingAmount: 10,
+                CouponCode: null
+            }
+        });
+
+        window.dataLayer.length.should.equal(0);
 
         done();
     });
