@@ -4,7 +4,7 @@ var common = require('./common'),
 
 var commerceHandler = {
     logCommerceEvent: function(event) {
-        if (event.EventDataType === 16) {
+        if (event.EventDataType === mParticle.CommerceEventType.ProductPurchase) {
             var eventMapping = common.getEventMapping(event);
             if (eventMapping && eventMapping.result && eventMapping.match) {
                 var gtagProperties = {};
@@ -31,7 +31,7 @@ var commerceHandler = {
                     console.log('Counter type not valid. For sales conversions, use \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
                     return false;
                 }
-                window.gtag('event', 'purchase', gtagProperties);
+                common.gtag('event', 'purchase', gtagProperties);
             } else {
                 console.log('Event not mapped. Event not sent.');
                 return false;

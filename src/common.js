@@ -20,7 +20,9 @@ module.exports = {
         return findValueInMapping(jsHash, this.eventMapping);
     },
     sendGtag: function(type, properties) {
-        window.gtag('event', type, properties);
+        if (Array.isArray(window.dataLayer)) {
+            window.dataLayer.push(['event', type, properties]);
+        }
     }
 };
 

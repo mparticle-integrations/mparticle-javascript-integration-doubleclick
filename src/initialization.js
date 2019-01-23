@@ -4,9 +4,6 @@ var initialization = {
     name: 'DoubleclickDFP',
     initForwarder: function(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized) {
         common.settings = settings;
-        window.gtag = function() {
-            window.dataLayer.push(arguments);
-        };
 
         window.dataLayer = window.dataLayer || [];
         if (!testMode) {
