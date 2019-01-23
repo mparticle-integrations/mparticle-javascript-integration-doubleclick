@@ -323,7 +323,13 @@ var commerceHandler = {
             }
 
             var eventMapping = common.getEventMapping(event);
-            if (eventMapping && eventMapping.result && eventMapping.match) {
+
+            if (!eventMapping) {
+                console.log('Event not mapped. Event not sent.');
+                return false;
+            }
+
+            if (eventMapping.result && eventMapping.match) {
                 var gtagProperties = {};
                 common.setCustomVariables(event, gtagProperties);
                 common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
@@ -336,9 +342,7 @@ var commerceHandler = {
                     gtagProperties.quantity = '' + event.ProductAction.ProductList.length;
                 }
                 common.sendGtag('purchase', gtagProperties);
-            } else {
-                console.log('Event not mapped. Event not sent.');
-                return false;
+                return true;
             }
         }
     }
@@ -432,17 +436,16 @@ var eventHandler = {
 
         if (eventMapping.result && eventMapping.match) {
             var counter = event.CustomFlags && event.CustomFlags['DoubleClick.Counter'] ? event.CustomFlags['DoubleClick.Counter'] : null;
-            if (counter) {
-                if (eventCounterTypes[counter]) {
-                    common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
-                    gtagProperties.send_to += ('+' + counter);
-                    common.sendGtag('conversion', gtagProperties);
-                } else {
-                    console.log('Counter type not valid. For event conversions, use \'standard\', \'unique\, or \'per_session\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                    return false;
-                }
-            } else {
+            if (!counter) {
                 console.log('Event not sent. Event conversions requires a custom flag of DoubleClick.Counter equal to \'standard\', \'unique\, or \'per_session\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
+                return false;
+            }
+            if (eventCounterTypes[counter]) {
+                common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
+                gtagProperties.send_to += ('+' + counter);
+                common.sendGtag('conversion', gtagProperties);
+            } else {
+                console.log('Counter type not valid. For event conversions, use \'standard\', \'unique\, or \'per_session\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
                 return false;
             }
         }

@@ -18,7 +18,13 @@ var commerceHandler = {
             }
 
             var eventMapping = common.getEventMapping(event);
-            if (eventMapping && eventMapping.result && eventMapping.match) {
+
+            if (!eventMapping) {
+                console.log('Event not mapped. Event not sent.');
+                return false;
+            }
+
+            if (eventMapping.result && eventMapping.match) {
                 var gtagProperties = {};
                 common.setCustomVariables(event, gtagProperties);
                 common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
@@ -32,9 +38,6 @@ var commerceHandler = {
                 }
                 common.sendGtag('purchase', gtagProperties);
                 return true;
-            } else {
-                console.log('Event not mapped. Event not sent.');
-                return false;
             }
         }
     }
