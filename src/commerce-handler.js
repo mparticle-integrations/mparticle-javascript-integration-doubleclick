@@ -31,6 +31,7 @@ var commerceHandler = {
                     gtagProperties.quantity = '' + event.ProductAction.ProductList.length;
                 }
                 common.sendGtag('purchase', gtagProperties);
+                return true;
             } else {
                 console.log('Event not mapped. Event not sent.');
                 return false;
