@@ -1,35 +1,42 @@
-/*
-A non-ecommerce event has the following schema:
+var common = require('./common');
 
-{
-    DeviceId: "a80eea1c-57f5-4f84-815e-06fe971b6ef2",
-    EventAttributes: {test: "Error", t: 'stack trace in string form'},
-    EventName: "Error",
-    MPID: "123123123123",
-    UserAttributes: {userAttr1: 'value1', userAttr2: 'value2'},
-    UserIdentities: [{Identity: 'email@gmail.com', Type: 7}]
-    User Identity Types can be found here:
-}
-
-*/
+var eventCounterTypes = {
+    standard: 1,
+    unique: 1,
+    per_session: 1
+};
 
 var eventHandler = {
     logEvent: function(event) {
+        var gtagProperties = {};
+        common.setCustomVariables(event, gtagProperties);
+        var eventMapping = common.getEventMapping(event);
 
-    },
-    logError: function(event) {
-        // The schema for a logError event is the same, but noteworthy differences are as follows:
-        // {
-        //     EventAttributes: {m: 'name of error passed into MP', s: "Error", t: 'stack trace in string form if applicable'},
-        //     EventName: "Error"
-        // }
-    },
-    logPageView: function(event) {
-        /* The schema for a logPagView event is the same, but noteworthy differences are as follows:
-        {
-            EventAttributes: {hostname: "www.google.com", title: 'Test Page'},  // These are event attributes only if no additional event attributes are explicitly provided to mParticle.logPageView(...)
+        if (!eventMapping) {
+            console.log('Event not mapped. Event not sent.');
+            return false;
         }
-        */
+
+        if (eventMapping.result && eventMapping.match) {
+            var counter = event.CustomFlags && event.CustomFlags['DoubleClick.Counter'] ? event.CustomFlags['DoubleClick.Counter'] : null;
+            if (!counter) {
+                console.log('Event not sent. Event conversions requires a custom flag of DoubleClick.Counter equal to \'standard\', \'unique\, or \'per_session\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
+                return false;
+            }
+            if (eventCounterTypes[counter]) {
+                common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
+                gtagProperties.send_to += ('+' + counter);
+                common.sendGtag('conversion', gtagProperties);
+            } else {
+                console.log('Counter type not valid. For event conversions, use \'standard\', \'unique\, or \'per_session\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
+                return false;
+            }
+        }
+        return true;
+    },
+    logError: function() {
+    },
+    logPageView: function() {
     }
 };
 
