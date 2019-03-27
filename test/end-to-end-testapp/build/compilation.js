@@ -1,4 +1,36 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+require('@mparticle/web-kit-wrapper/index.js');
+require('@mparticle/web-kit-wrapper/end-to-end-testapp/kitConfiguration.js');
+
+},{"@mparticle/web-kit-wrapper/end-to-end-testapp/kitConfiguration.js":2,"@mparticle/web-kit-wrapper/index.js":3}],2:[function(require,module,exports){
+var SDKSettings = require('../../../../test/end-to-end-testapp/settings.js');
+var name = require('../../../../src/initialization.js').name;
+
+var config = {
+    name: name,
+    moduleId: 100, // when published, you will receive a new moduleID
+    isDebug: true,
+    isSandbox: true,
+    settings: SDKSettings,
+    userIdentityFilters: [],
+    hasDebugString: [],
+    isVisible: [],
+    eventNameFilters: [],
+    eventTypeFilters: [],
+    attributeFilters: [],
+    screenNameFilters: [],
+    pageViewAttributeFilters: [],
+    userAttributeFilters: [],
+    filteringEventAttributeValue: 'null',
+    filteringUserAttributeValue: 'null',
+    eventSubscriptionId: 123,
+    filteringConsentRuleValues: 'null',
+    excludeAnonymousUser: false
+};
+
+mParticle.configureForwarder(config);
+
+},{"../../../../src/initialization.js":8,"../../../../test/end-to-end-testapp/settings.js":11}],3:[function(require,module,exports){
 // =============== REACH OUT TO MPARTICLE IF YOU HAVE ANY QUESTIONS ===============
 //
 //  Copyright 2018 mParticle, Inc.
@@ -302,7 +334,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
     });
 })(window);
 
-},{"../../../src/commerce-handler":2,"../../../src/event-handler":4,"../../../src/identity-handler":5,"../../../src/initialization":6,"../../../src/session-handler":7,"../../../src/user-attribute-handler":8}],2:[function(require,module,exports){
+},{"../../../src/commerce-handler":4,"../../../src/event-handler":6,"../../../src/identity-handler":7,"../../../src/initialization":8,"../../../src/session-handler":9,"../../../src/user-attribute-handler":10}],4:[function(require,module,exports){
 var common = require('./common'),
     salesCounterTypes = {
         transactions: 1,
@@ -350,7 +382,7 @@ var commerceHandler = {
 
 module.exports = commerceHandler;
 
-},{"./common":3}],3:[function(require,module,exports){
+},{"./common":5}],5:[function(require,module,exports){
 module.exports = {
     eventMapping: {},
     customVariablesMappings: {},
@@ -379,8 +411,10 @@ module.exports = {
         if (Array.isArray(window.dataLayer)) {
             if (isInitialization) {
                 gtag(type, properties);
+                // window.dataLayer.push([]);
             } else {
                 gtag('event', type, properties);
+                // window.dataLayer.push(['event', type, properties]);
             }
         }
     }
@@ -417,7 +451,7 @@ function calculateJSHash(eventDataType, eventCategory, name) {
     return mParticle.generateHash(preHash);
 }
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var common = require('./common');
 
 var eventCounterTypes = {
@@ -462,7 +496,7 @@ var eventHandler = {
 
 module.exports = eventHandler;
 
-},{"./common":3}],5:[function(require,module,exports){
+},{"./common":5}],7:[function(require,module,exports){
 /*
 The 'mParticleUser' is an object with methods get user Identities and set/get user attributes
 Partners can determine what userIds are available to use in their SDK
@@ -512,7 +546,7 @@ var identityHandler = {
 
 module.exports = identityHandler;
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var common = require('./common');
 
 var initialization = {
@@ -556,15 +590,15 @@ function initializeGoogleDFP(settings, isInitialized) {
         a[b.map] = b.value;
         return a;
     }, {});
-    common.sendGtag('js', new Date(), true);
-    common.sendGtag('allow_custom_scripts', true, true);
-    common.sendGtag('config', settings.advertiserId, true);
+    common.sendGtag('js', new Date(), isInitialized);
+    common.sendGtag('allow_custom_scripts', true, isInitialized);
+    common.sendGtag('config', settings.advertiserId, isInitialized);
     isInitialized = true;
 }
 
 module.exports = initialization;
 
-},{"./common":3}],7:[function(require,module,exports){
+},{"./common":5}],9:[function(require,module,exports){
 var sessionHandler = {
     onSessionStart: function(event) {
         
@@ -576,7 +610,7 @@ var sessionHandler = {
 
 module.exports = sessionHandler;
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /*
 The 'mParticleUser' is an object with methods on it to get user Identities and set/get user attributes
 Partners can determine what userIds are available to use in their SDK
@@ -599,5 +633,17 @@ var userAttributeHandler = {
 };
 
 module.exports = userAttributeHandler;
+
+},{}],11:[function(require,module,exports){
+var SDKsettings = {
+    apiKey: 'testAPIKey'
+    /* fill in SDKsettings with any particular settings or options your sdk requires in order to
+    initialize, this may be apiKey, projectId, primaryCustomerType, etc. These are passed
+    into the src/initialization.js file as the
+    */
+};
+
+// Do not edit below:
+module.exports = SDKsettings;
 
 },{}]},{},[1]);
