@@ -20,11 +20,14 @@ module.exports = {
         return findValueInMapping(jsHash, this.eventMapping);
     },
     sendGtag: function(type, properties, isInitialization) {
+        function gtag() {
+            window.dataLayer.push(arguments);
+        }
         if (Array.isArray(window.dataLayer)) {
             if (isInitialization) {
-                window.dataLayer.push([type, properties]);
+                gtag(type, properties);
             } else {
-                window.dataLayer.push(['event', type, properties]);
+                gtag('event', type, properties);
             }
         }
     }
