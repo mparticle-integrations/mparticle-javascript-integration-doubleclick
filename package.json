@@ -1,6 +1,7 @@
 {
-  "name": "integration-nameOfYourIntegration",
-  "version": "1.0.0",
+  "name": "@mparticle/web-doubleclick-kit",
+  "version": "2.0.0-rc1",
+  "author": "mParticle Developers <developers@mparticle.com> (https://www.mparticle.com)",
   "scripts": {
     "testKarma": "node test/boilerplate/test-karma.js",
     "watch": "watchify ./node_modules/@mparticle/web-kit-wrapper/index.js -v -o build/$KIT-Kit.js",
@@ -23,5 +24,10 @@
     "mparticle-sdk-javascript": "github:mparticle/mparticle-sdk-javascript",
     "should": "13.2.3",
     "watchify": "^3.11.0"
-  }
+  },
+  "repository": "https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick",
+  "dependencies": {
+    "@mparticle/web-sdk": "^2.0.0"
+  },
+  "license": "Apache-2.0"
 }
