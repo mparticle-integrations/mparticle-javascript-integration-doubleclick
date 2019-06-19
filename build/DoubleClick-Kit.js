@@ -14,6 +14,8 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
+
+var Common = require('../../../src/common');
 var CommerceHandler = require('../../../src/commerce-handler');
 var EventHandler = require('../../../src/event-handler');
 var IdentityHandler = require('../../../src/identity-handler');
@@ -41,9 +43,11 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
             eventQueue = [];
 
         self.name = Initialization.name;
+        self.common = new Common();
 
         function initForwarder(settings, service, testMode, trackerId, userAttributes, userIdentities) {
             forwarderSettings = settings;
+
             if (window.mParticle.isTestEnvironment) {
                 reportingService = function() {
                 };
@@ -52,7 +56,12 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
             }
 
             try {
-                Initialization.initForwarder(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized);
+                Initialization.initForwarder(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized, self.common);
+                self.eventHandler = new EventHandler(self.common);
+                self.identityHandler = new IdentityHandler(self.common);
+                self.userAttributeHandler = new UserAttributeHandler(self.common);
+                self.commerceHandler = new CommerceHandler(self.common);
+
                 isInitialized = true;
             } catch (e) {
                 console.log('Failed to initialize ' + name + ' - ' + e);
@@ -115,7 +124,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
 
         function logError(event) {
             try {
-                EventHandler.logError(event);
+                self.eventHandler.logError(event);
                 return true;
             } catch (e) {
                 return {error: 'Error logging error on forwarder ' + name + '; ' + e};
@@ -124,7 +133,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
 
         function logPageView(event) {
             try {
-                EventHandler.logPageView(event);
+                self.eventHandler.logPageView(event);
                 return true;
             } catch (e) {
                 return {error: 'Error logging page view on forwarder ' + name + '; ' + e};
@@ -133,7 +142,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
 
         function logEvent(event) {
             try {
-                EventHandler.logEvent(event);
+                self.eventHandler.logEvent(event);
                 return true;
             } catch (e) {
                 return {error: 'Error logging event on forwarder ' + name + '; ' + e};
@@ -142,7 +151,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
 
         function logEcommerceEvent(event) {
             try {
-                CommerceHandler.logCommerceEvent(event);
+                self.commerceHandler.logCommerceEvent(event);
                 return true;
             } catch (e) {
                 return {error: 'Error logging purchase event on forwarder ' + name + '; ' + e};
@@ -152,7 +161,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function setUserAttribute(key, value) {
             if (isInitialized) {
                 try {
-                    UserAttributeHandler.onSetUserAttribute(key, value, forwarderSettings);
+                    self.userAttributeHandler.onSetUserAttribute(key, value, forwarderSettings);
                     return 'Successfully set user attribute on forwarder ' + name;
                 } catch (e) {
                     return 'Error setting user attribute on forwarder ' + name + '; ' + e;
@@ -165,7 +174,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function removeUserAttribute(key) {
             if (isInitialized) {
                 try {
-                    UserAttributeHandler.onRemoveUserAttribute(key, forwarderSettings);
+                    self.userAttributeHandler.onRemoveUserAttribute(key, forwarderSettings);
                     return 'Successfully removed user attribute on forwarder ' + name;
                 } catch (e) {
                     return 'Error removing user attribute on forwarder ' + name + '; ' + e;
@@ -178,7 +187,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function setUserIdentity(id, type) {
             if (isInitialized) {
                 try {
-                    IdentityHandler.onSetUserIdentity(forwarderSettings, id, type);
+                    self.identityHandler.onSetUserIdentity(forwarderSettings, id, type);
                     return 'Successfully set user Identity on forwarder ' + name;
                 } catch (e) {
                     return 'Error removing user attribute on forwarder ' + name + '; ' + e;
@@ -192,7 +201,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function onUserIdentified(user) {
             if (isInitialized) {
                 try {
-                    IdentityHandler.onUserIdentified(user);
+                    self.identityHandler.onUserIdentified(user);
 
                     return 'Successfully called onUserIdentified on forwarder ' + name;
                 } catch (e) {
@@ -207,11 +216,11 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function onIdentifyComplete(user, filteredIdentityRequest) {
             if (isInitialized) {
                 try {
-                    IdentityHandler.onIdentifyCompleted(user, filteredIdentityRequest);
+                    self.identityHandler.onIdentifyComplete(user, filteredIdentityRequest);
 
-                    return 'Successfully called onIdentifyCompleted on forwarder ' + name;
+                    return 'Successfully called onIdentifyComplete on forwarder ' + name;
                 } catch (e) {
-                    return {error: 'Error calling onIdentifyCompleted on forwarder ' + name + '; ' + e};
+                    return {error: 'Error calling onIdentifyComplete on forwarder ' + name + '; ' + e};
                 }
             }
             else {
@@ -222,7 +231,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function onLoginComplete(user, filteredIdentityRequest) {
             if (isInitialized) {
                 try {
-                    IdentityHandler.onLoginComplete(user, filteredIdentityRequest);
+                    self.identityHandler.onLoginComplete(user, filteredIdentityRequest);
 
                     return 'Successfully called onLoginComplete on forwarder ' + name;
                 } catch (e) {
@@ -237,7 +246,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function onLogoutComplete(user, filteredIdentityRequest) {
             if (isInitialized) {
                 try {
-                    IdentityHandler.onLogoutComplete(user, filteredIdentityRequest);
+                    self.identityHandler.onLogoutComplete(user, filteredIdentityRequest);
 
                     return 'Successfully called onLogoutComplete on forwarder ' + name;
                 } catch (e) {
@@ -252,7 +261,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function onModifyComplete(user, filteredIdentityRequest) {
             if (isInitialized) {
                 try {
-                    IdentityHandler.onModifyComplete(user, filteredIdentityRequest);
+                    self.identityHandler.onModifyComplete(user, filteredIdentityRequest);
 
                     return 'Successfully called onModifyComplete on forwarder ' + name;
                 } catch (e) {
@@ -267,7 +276,7 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
         function setOptOut(isOptingOutBoolean) {
             if (isInitialized) {
                 try {
-                    Initialization.setOptOut(isOptingOutBoolean);
+                    self.initialization.setOptOut(isOptingOutBoolean);
 
                     return 'Successfully called setOptOut on forwarder ' + name;
                 } catch (e) {
@@ -302,94 +311,119 @@ var UserAttributeHandler = require('../../../src/user-attribute-handler');
     });
 })(window);
 
-},{"../../../src/commerce-handler":2,"../../../src/event-handler":4,"../../../src/identity-handler":5,"../../../src/initialization":6,"../../../src/session-handler":7,"../../../src/user-attribute-handler":8}],2:[function(require,module,exports){
-var common = require('./common'),
-    salesCounterTypes = {
-        transactions: 1,
-        items_sold: 1
-    },
-    ITEMS_SOLD = 'items_sold';
+},{"../../../src/commerce-handler":2,"../../../src/common":3,"../../../src/event-handler":4,"../../../src/identity-handler":5,"../../../src/initialization":6,"../../../src/session-handler":7,"../../../src/user-attribute-handler":8}],2:[function(require,module,exports){
+var salesCounterTypes = {
+    transactions: 1,
+    items_sold: 1
+};
+var ITEMS_SOLD = 'items_sold';
 
-var commerceHandler = {
-    logCommerceEvent: function(event) {
-        if (event.EventDataType === mParticle.CommerceEventType.ProductPurchase) {
-            var counter = event.CustomFlags && event.CustomFlags['DoubleClick.Counter'] ? event.CustomFlags['DoubleClick.Counter'] : null;
-            if (!counter) {
-                console.log('Event not sent. Sales conversions requires a custom flag of DoubleClick.Counter equal to \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                return false;
-            } else if (!salesCounterTypes[counter]) {
-                console.log('Counter type not valid. For sales conversions, use a custom flag of DoubleClick.Counter equal to \'transactions\', or \'items_sold\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                return false;
+function CommerceHandler(common) {
+    this.common = common || {};
+}
+
+CommerceHandler.prototype.logCommerceEvent = function(event) {
+    if (event.EventDataType === mParticle.CommerceEventType.ProductPurchase) {
+        var counter =
+            event.CustomFlags && event.CustomFlags['DoubleClick.Counter']
+                ? event.CustomFlags['DoubleClick.Counter']
+                : null;
+        if (!counter) {
+            console.log(
+                "Event not sent. Sales conversions requires a custom flag of DoubleClick.Counter equal to 'transactions', or 'items_sold'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info"
+            );
+            return false;
+        } else if (!salesCounterTypes[counter]) {
+            console.log(
+                "Counter type not valid. For sales conversions, use a custom flag of DoubleClick.Counter equal to 'transactions', or 'items_sold'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info"
+            );
+            return false;
+        }
+
+        var eventMapping = this.common.getEventMapping(event);
+
+        if (!eventMapping) {
+            console.log('Event not mapped. Event not sent.');
+            return false;
+        }
+
+        if (eventMapping.result && eventMapping.match) {
+            var gtagProperties = {};
+            this.common.setCustomVariables(event, gtagProperties);
+            this.common.setSendTo(
+                eventMapping.match,
+                event.CustomFlags,
+                gtagProperties
+            );
+            gtagProperties.send_to += '+' + counter;
+            //stringify number
+            gtagProperties.value = '' + event.ProductAction.TotalAmount;
+            gtagProperties.transaction_id = event.ProductAction.TransactionId;
+
+            if (counter === ITEMS_SOLD) {
+                gtagProperties.quantity =
+                    '' + event.ProductAction.ProductList.length;
             }
-
-            var eventMapping = common.getEventMapping(event);
-
-            if (!eventMapping) {
-                console.log('Event not mapped. Event not sent.');
-                return false;
-            }
-
-            if (eventMapping.result && eventMapping.match) {
-                var gtagProperties = {};
-                common.setCustomVariables(event, gtagProperties);
-                common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
-                gtagProperties.send_to += ('+' + counter);
-                //stringify number
-                gtagProperties.value = '' + event.ProductAction.TotalAmount;
-                gtagProperties.transaction_id = event.ProductAction.TransactionId;
-
-                if (counter === ITEMS_SOLD) {
-                    gtagProperties.quantity = '' + event.ProductAction.ProductList.length;
-                }
-                common.sendGtag('purchase', gtagProperties);
-                return true;
-            }
+            this.common.sendGtag('purchase', gtagProperties);
+            return true;
         }
     }
 };
 
-module.exports = commerceHandler;
+module.exports = CommerceHandler;
 
-},{"./common":3}],3:[function(require,module,exports){
-module.exports = {
-    eventMapping: {},
-    customVariablesMappings: {},
-    settings: {},
-    setCustomVariables: function(event, gtagProperties) {
-        for (var attribute in event.EventAttributes) {
-            if (this.customVariablesMappings[attribute]) {
-                gtagProperties[this.customVariablesMappings[attribute]] = event.EventAttributes[attribute];
-            }
-        }
-    },
-    setSendTo: function(mapping, customFlags, gtagProperties) {
-        var tags = mapping.value.split(';');
-        var groupTag = tags[0];
-        var activityTag = tags[1];
-        gtagProperties.send_to = 'DC-' + this.settings.advertiserId + '/' + groupTag + '/' + activityTag;
-    },
-    getEventMapping: function (event) {
-        var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, event.EventName);
-        return findValueInMapping(jsHash, this.eventMapping);
-    },
-    sendGtag: function(type, properties, isInitialization) {
-        function gtag() {
-            window.dataLayer.push(arguments);
-        }
-        if (Array.isArray(window.dataLayer)) {
-            if (isInitialization) {
-                gtag(type, properties);
-            } else {
-                gtag('event', type, properties);
-            }
+},{}],3:[function(require,module,exports){
+function Common() {}
+
+Common.prototype.eventMapping = {};
+Common.prototype.customVariablesMappings = {};
+Common.prototype.settings = {};
+Common.prototype.setCustomVariables = function(event, gtagProperties) {
+    for (var attribute in event.EventAttributes) {
+        if (this.customVariablesMappings[attribute]) {
+            gtagProperties[this.customVariablesMappings[attribute]] =
+                event.EventAttributes[attribute];
         }
     }
 };
+Common.prototype.setSendTo = function(mapping, customFlags, gtagProperties) {
+    var tags = mapping.value.split(';');
+    var groupTag = tags[0];
+    var activityTag = tags[1];
+    gtagProperties.send_to =
+        'DC-' + this.settings.advertiserId + '/' + groupTag + '/' + activityTag;
+};
+Common.prototype.getEventMapping = function(event) {
+    var jsHash = calculateJSHash(
+        event.EventDataType,
+        event.EventCategory,
+        event.EventName
+    );
+    return findValueInMapping(jsHash, this.eventMapping);
+};
+Common.prototype.sendGtag = function(type, properties, isInitialization) {
+    function gtag() {
+        window.dataLayer.push(arguments);
+    }
+    if (Array.isArray(window.dataLayer)) {
+        if (isInitialization) {
+            gtag(type, properties);
+        } else {
+            gtag('event', type, properties);
+        }
+    }
+};
+
+module.exports = Common;
 
 function findValueInMapping(jsHash, mapping) {
     if (mapping) {
         var filteredArray = mapping.filter(function(mappingEntry) {
-            if (mappingEntry.jsmap && mappingEntry.maptype && mappingEntry.value) {
+            if (
+                mappingEntry.jsmap &&
+                mappingEntry.maptype &&
+                mappingEntry.value
+            ) {
                 return mappingEntry.jsmap === jsHash.toString();
             }
 
@@ -409,10 +443,7 @@ function findValueInMapping(jsHash, mapping) {
 }
 
 function calculateJSHash(eventDataType, eventCategory, name) {
-    var preHash =
-        ('' + eventDataType) +
-        ('' + eventCategory) + '' +
-        (name || '');
+    var preHash = '' + eventDataType + ('' + eventCategory) + '' + (name || '');
 
     return mParticle.generateHash(preHash);
 }
@@ -426,41 +457,52 @@ var eventCounterTypes = {
     per_session: 1
 };
 
-var eventHandler = {
-    logEvent: function(event) {
-        var gtagProperties = {};
-        common.setCustomVariables(event, gtagProperties);
-        var eventMapping = common.getEventMapping(event);
+function EventHandler(common) {
+    this.common = common || {};
+}
 
-        if (!eventMapping) {
-            console.log('Event not mapped. Event not sent.');
+EventHandler.prototype.logEvent = function(event) {
+    var gtagProperties = {};
+    this.common.setCustomVariables(event, gtagProperties);
+    var eventMapping = this.common.getEventMapping(event);
+
+    if (!eventMapping) {
+        console.log('Event not mapped. Event not sent.');
+        return false;
+    }
+
+    if (eventMapping.result && eventMapping.match) {
+        var counter =
+            event.CustomFlags && event.CustomFlags['DoubleClick.Counter']
+                ? event.CustomFlags['DoubleClick.Counter']
+                : null;
+        if (!counter) {
+            console.log(
+                "Event not sent. Event conversions requires a custom flag of DoubleClick.Counter equal to 'standard', 'unique, or 'per_session'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info"
+            );
             return false;
         }
-
-        if (eventMapping.result && eventMapping.match) {
-            var counter = event.CustomFlags && event.CustomFlags['DoubleClick.Counter'] ? event.CustomFlags['DoubleClick.Counter'] : null;
-            if (!counter) {
-                console.log('Event not sent. Event conversions requires a custom flag of DoubleClick.Counter equal to \'standard\', \'unique\, or \'per_session\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                return false;
-            }
-            if (eventCounterTypes[counter]) {
-                common.setSendTo(eventMapping.match, event.CustomFlags, gtagProperties);
-                gtagProperties.send_to += ('+' + counter);
-                common.sendGtag('conversion', gtagProperties);
-            } else {
-                console.log('Counter type not valid. For event conversions, use \'standard\', \'unique\, or \'per_session\'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info')
-                return false;
-            }
+        if (eventCounterTypes[counter]) {
+            this.common.setSendTo(
+                eventMapping.match,
+                event.CustomFlags,
+                gtagProperties
+            );
+            gtagProperties.send_to += '+' + counter;
+            this.common.sendGtag('conversion', gtagProperties);
+        } else {
+            console.log(
+                "Counter type not valid. For event conversions, use 'standard', 'unique, or 'per_session'. See https://support.google.com/dcm/partner/answer/2823400?hl=en for more info"
+            );
+            return false;
         }
-        return true;
-    },
-    logError: function() {
-    },
-    logPageView: function() {
     }
+    return true;
 };
+EventHandler.prototype.logError = function() {};
+EventHandler.prototype.logPageView = function() {};
 
-module.exports = eventHandler;
+module.exports = EventHandler;
 
 },{"./common":3}],5:[function(require,module,exports){
 /*
@@ -471,7 +513,6 @@ For more identity types, see http://docs.mparticle.com/developers/sdk/javascript
 Call mParticleUser.getMPID() to get mParticle ID
 For any additional methods, see http://docs.mparticle.com/developers/sdk/javascript/apidocs/classes/mParticle.Identity.getCurrentUser().html
 */
-
 
 /*
 identityApiRequest has the schema:
@@ -484,40 +525,44 @@ identityApiRequest has the schema:
 For more userIdentity types, see http://docs.mparticle.com/developers/sdk/javascript/identity#allowed-identity-types
 */
 
-var identityHandler = {
-    onUserIdentified: function(mParticleUser) {
+function IdentityHandler(common) {
+    this.common = common || {};
+}
 
-    },
-    onIdentifyCompleted: function(mParticleUser, identityApiRequest) {
-
-    },
-    onLoginCompleted: function(mParticleUser, identityApiRequest) {
-
-    },
-    onLogoutCompleted: function(mParticleUser, identityApiRequest) {
-
-    },
-    onModifyCompleted: function(mParticleUser, identityApiRequest) {
-
-    },
+IdentityHandler.prototype.onUserIdentified = function(mParticleUser) {};
+IdentityHandler.prototype.onIdentifyCompleted = function(
+    mParticleUser,
+    identityApiRequest
+) {};
+IdentityHandler.prototype.onLoginCompleted = function(
+    mParticleUser,
+    identityApiRequest
+) {};
+IdentityHandler.prototype.onLogoutCompleted = function(
+    mParticleUser,
+    identityApiRequest
+) {};
+IdentityHandler.prototype.onModifyCompleted = function(
+    mParticleUser,
+    identityApiRequest
+) {};
 
 /*  In previous versions of the mParticle web SDK, setting user identities on
     kits is only reachable via the onSetUserIdentity method below. We recommend
     filling out `onSetUserIdentity` for maximum compatibility
 */
-    onSetUserIdentity: function(forwarderSettings, id, type) {
+IdentityHandler.prototype.onSetUserIdentity = function(
+    forwarderSettings,
+    id,
+    type
+) {};
 
-    }
-};
-
-module.exports = identityHandler;
+module.exports = IdentityHandler;
 
 },{}],6:[function(require,module,exports){
-var common = require('./common');
-
 var initialization = {
     name: 'DoubleclickDFP',
-    initForwarder: function(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized) {
+    initForwarder: function(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized, common) {
         common.settings = settings;
 
         window.dataLayer = window.dataLayer || [];
@@ -532,7 +577,7 @@ var initialization = {
             gTagScript.onload = function() {
                 isInitialized = true;
 
-                initializeGoogleDFP(settings);
+                initializeGoogleDFP(common, settings);
 
                 if (eventQueue.length > 0) {
                     // Process any events that may have been queued up while forwarder was being initialized.
@@ -544,12 +589,12 @@ var initialization = {
                 }
             };
         } else {
-            initializeGoogleDFP(settings, isInitialized);
+            initializeGoogleDFP(common, settings, isInitialized);
         }
     }
 };
 
-function initializeGoogleDFP(settings, isInitialized) {
+function initializeGoogleDFP(common, settings, isInitialized) {
     common.eventMapping = JSON.parse(settings.eventMapping.replace(/&quot;/g, '\"'));
 
     common.customVariablesMappings = JSON.parse(settings.customVariables.replace(/&quot;/g, '\"')).reduce(function(a, b) {
@@ -564,7 +609,7 @@ function initializeGoogleDFP(settings, isInitialized) {
 
 module.exports = initialization;
 
-},{"./common":3}],7:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var sessionHandler = {
     onSessionStart: function(event) {
         
@@ -586,18 +631,25 @@ Call mParticleUser.getMPID() to get mParticle ID
 For any additional methods, see http://docs.mparticle.com/developers/sdk/javascript/apidocs/classes/mParticle.Identity.getCurrentUser().html
 */
 
-var userAttributeHandler = {
-    onRemoveUserAttribute: function(key, mParticleUser) {
+function UserAttributeHandler(common) {
+    this.common = common = {};
+}
 
-    },
-    onSetUserAttribute: function(key, value, mParticleUser) {
+UserAttributeHandler.prototype.onRemoveUserAttribute = function(
+    key,
+    mParticleUser
+) {};
+UserAttributeHandler.prototype.onSetUserAttribute = function(
+    key,
+    value,
+    mParticleUser
+) {};
+UserAttributeHandler.prototype.onConsentStateUpdated = function(
+    oldState,
+    newState,
+    mParticleUser
+) {};
 
-    },
-    onConsentStateUpdated: function(oldState, newState, mParticleUser) {
-
-    }
-};
-
-module.exports = userAttributeHandler;
+module.exports = UserAttributeHandler;
 
 },{}]},{},[1]);

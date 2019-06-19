@@ -7,16 +7,23 @@ Call mParticleUser.getMPID() to get mParticle ID
 For any additional methods, see http://docs.mparticle.com/developers/sdk/javascript/apidocs/classes/mParticle.Identity.getCurrentUser().html
 */
 
-var userAttributeHandler = {
-    onRemoveUserAttribute: function(key, mParticleUser) {
+function UserAttributeHandler(common) {
+    this.common = common = {};
+}
 
-    },
-    onSetUserAttribute: function(key, value, mParticleUser) {
+UserAttributeHandler.prototype.onRemoveUserAttribute = function(
+    key,
+    mParticleUser
+) {};
+UserAttributeHandler.prototype.onSetUserAttribute = function(
+    key,
+    value,
+    mParticleUser
+) {};
+UserAttributeHandler.prototype.onConsentStateUpdated = function(
+    oldState,
+    newState,
+    mParticleUser
+) {};
 
-    },
-    onConsentStateUpdated: function(oldState, newState, mParticleUser) {
-
-    }
-};
-
-module.exports = userAttributeHandler;
+module.exports = UserAttributeHandler;

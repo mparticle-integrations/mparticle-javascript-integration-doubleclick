@@ -1,42 +1,54 @@
-module.exports = {
-    eventMapping: {},
-    customVariablesMappings: {},
-    settings: {},
-    setCustomVariables: function(event, gtagProperties) {
-        for (var attribute in event.EventAttributes) {
-            if (this.customVariablesMappings[attribute]) {
-                gtagProperties[this.customVariablesMappings[attribute]] = event.EventAttributes[attribute];
-            }
+function Common() {}
+
+Common.prototype.eventMapping = {};
+Common.prototype.customVariablesMappings = {};
+Common.prototype.settings = {};
+Common.prototype.setCustomVariables = function(event, gtagProperties) {
+    for (var attribute in event.EventAttributes) {
+        if (this.customVariablesMappings[attribute]) {
+            gtagProperties[this.customVariablesMappings[attribute]] =
+                event.EventAttributes[attribute];
         }
-    },
-    setSendTo: function(mapping, customFlags, gtagProperties) {
-        var tags = mapping.value.split(';');
-        var groupTag = tags[0];
-        var activityTag = tags[1];
-        gtagProperties.send_to = 'DC-' + this.settings.advertiserId + '/' + groupTag + '/' + activityTag;
-    },
-    getEventMapping: function (event) {
-        var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, event.EventName);
-        return findValueInMapping(jsHash, this.eventMapping);
-    },
-    sendGtag: function(type, properties, isInitialization) {
-        function gtag() {
-            window.dataLayer.push(arguments);
-        }
-        if (Array.isArray(window.dataLayer)) {
-            if (isInitialization) {
-                gtag(type, properties);
-            } else {
-                gtag('event', type, properties);
-            }
+    }
+};
+Common.prototype.setSendTo = function(mapping, customFlags, gtagProperties) {
+    var tags = mapping.value.split(';');
+    var groupTag = tags[0];
+    var activityTag = tags[1];
+    gtagProperties.send_to =
+        'DC-' + this.settings.advertiserId + '/' + groupTag + '/' + activityTag;
+};
+Common.prototype.getEventMapping = function(event) {
+    var jsHash = calculateJSHash(
+        event.EventDataType,
+        event.EventCategory,
+        event.EventName
+    );
+    return findValueInMapping(jsHash, this.eventMapping);
+};
+Common.prototype.sendGtag = function(type, properties, isInitialization) {
+    function gtag() {
+        window.dataLayer.push(arguments);
+    }
+    if (Array.isArray(window.dataLayer)) {
+        if (isInitialization) {
+            gtag(type, properties);
+        } else {
+            gtag('event', type, properties);
         }
     }
 };
 
+module.exports = Common;
+
 function findValueInMapping(jsHash, mapping) {
     if (mapping) {
         var filteredArray = mapping.filter(function(mappingEntry) {
-            if (mappingEntry.jsmap && mappingEntry.maptype && mappingEntry.value) {
+            if (
+                mappingEntry.jsmap &&
+                mappingEntry.maptype &&
+                mappingEntry.value
+            ) {
                 return mappingEntry.jsmap === jsHash.toString();
             }
 
@@ -56,10 +68,7 @@ function findValueInMapping(jsHash, mapping) {
 }
 
 function calculateJSHash(eventDataType, eventCategory, name) {
-    var preHash =
-        ('' + eventDataType) +
-        ('' + eventCategory) + '' +
-        (name || '');
+    var preHash = '' + eventDataType + ('' + eventCategory) + '' + (name || '');
 
     return mParticle.generateHash(preHash);
 }

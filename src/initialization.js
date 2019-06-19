@@ -1,8 +1,6 @@
-var common = require('./common');
-
 var initialization = {
     name: 'DoubleclickDFP',
-    initForwarder: function(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized) {
+    initForwarder: function(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized, common) {
         common.settings = settings;
 
         window.dataLayer = window.dataLayer || [];
@@ -17,7 +15,7 @@ var initialization = {
             gTagScript.onload = function() {
                 isInitialized = true;
 
-                initializeGoogleDFP(settings);
+                initializeGoogleDFP(common, settings);
 
                 if (eventQueue.length > 0) {
                     // Process any events that may have been queued up while forwarder was being initialized.
@@ -29,12 +27,12 @@ var initialization = {
                 }
             };
         } else {
-            initializeGoogleDFP(settings, isInitialized);
+            initializeGoogleDFP(common, settings, isInitialized);
         }
     }
 };
 
-function initializeGoogleDFP(settings, isInitialized) {
+function initializeGoogleDFP(common, settings, isInitialized) {
     common.eventMapping = JSON.parse(settings.eventMapping.replace(/&quot;/g, '\"'));
 
     common.customVariablesMappings = JSON.parse(settings.customVariables.replace(/&quot;/g, '\"')).reduce(function(a, b) {
