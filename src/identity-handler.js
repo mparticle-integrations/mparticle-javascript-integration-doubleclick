@@ -23,19 +23,19 @@ function IdentityHandler(common) {
 }
 
 IdentityHandler.prototype.onUserIdentified = function(mParticleUser) {};
-IdentityHandler.prototype.onIdentifyCompleted = function(
+IdentityHandler.prototype.onIdentifyComplete = function(
     mParticleUser,
     identityApiRequest
 ) {};
-IdentityHandler.prototype.onLoginCompleted = function(
+IdentityHandler.prototype.onLoginComplete = function(
     mParticleUser,
     identityApiRequest
 ) {};
-IdentityHandler.prototype.onLogoutCompleted = function(
+IdentityHandler.prototype.onLogoutComplete = function(
     mParticleUser,
     identityApiRequest
 ) {};
-IdentityHandler.prototype.onModifyCompleted = function(
+IdentityHandler.prototype.onModifyComplete = function(
     mParticleUser,
     identityApiRequest
 ) {};
