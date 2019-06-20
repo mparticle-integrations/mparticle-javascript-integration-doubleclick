@@ -366,7 +366,7 @@
 
 	(function (window) {
 	    var name = initialization_1.name,
-	    moduleId = initialization_1.moduleId,
+	        moduleId = initialization_1.moduleId,
 	        MessageType = {
 	            SessionStart: 1,
 	            SessionEnd: 2,
