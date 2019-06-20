@@ -1,5 +1,6 @@
 var initialization = {
     name: 'DoubleclickDFP',
+    moduleId: 41,
     initForwarder: function(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized, common) {
         common.settings = settings;
 
