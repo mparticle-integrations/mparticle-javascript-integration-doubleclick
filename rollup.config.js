@@ -5,7 +5,7 @@ export default [
         input: base.input,
         output: {
             ...base.output,
-            file: 'build/DoubleClick-Kit.js',
+            file: 'dist/DoubleClick-Kit.js',
             name: 'mp-doubleclick-kit'
         },
         plugins: [...base.plugins]
