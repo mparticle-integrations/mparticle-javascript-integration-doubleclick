@@ -5,8 +5,9 @@ export default [
         input: base.input,
         output: {
             ...base.output,
-            file: 'dist/DoubleClick-Kit.js',
-            name: 'mp-doubleclick-kit',
+            format: 'iife',
+            file: 'build/DoubleClick-Kit.js',
+            name: 'mpDoubleClickKit',
         },
         plugins: [...base.plugins]
     },
@@ -14,8 +15,19 @@ export default [
         input: base.input,
         output: {
             ...base.output,
-            file: 'build/DoubleClick-Kit.js',
-            name: 'mp-doubleclick-kit',
+            format: 'iife',
+            file: 'dist/DoubleClick-Kit.iife.js',
+            name: 'mpDoubleClickKit',
+        },
+        plugins: [...base.plugins]
+    },
+    {
+        input: base.input,
+        output: {
+            ...base.output,
+            format: 'cjs',
+            file: 'dist/DoubleClick-Kit.common.js',
+            name: 'mpDoubleClickKit',
         },
         plugins: [...base.plugins]
     }
