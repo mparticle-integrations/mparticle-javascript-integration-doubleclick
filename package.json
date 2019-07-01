@@ -1,10 +1,10 @@
 {
   "name": "@mparticle/web-double-click-kit",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.1-rc.1",
   "repository": "https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick",
-  "browser": "dist/DoubleClick-Kit.js",
+  "browser": "dist/DoubleClick-Kit.common.js",
   "files": [
-    "dist/DoubleClick-Kit.js"
+    "dist/DoubleClick-Kit.common.js"
   ],
   "scripts": {
     "testKarma": "node test/boilerplate/test-karma.js",
