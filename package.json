@@ -30,6 +30,6 @@
         "watchify": "^3.11.1"
     },
     "dependencies": {
-        "@mparticle/web-kit-wrapper": "^1.0.0-rc7"
+        "@mparticle/web-kit-wrapper": "git://github.com/mparticle-integrations/mparticle-javascript-web-kit-wrapper.git#bugfix/node-env"
     }
 }

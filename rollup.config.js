@@ -1,34 +1,34 @@
-import base from './node_modules/@mparticle/web-kit-wrapper/rollup.base';
+import { production } from './node_modules/@mparticle/web-kit-wrapper/rollup.base';
 
 export default [
     {
-        input: base.input,
+        input: production.input,
         output: {
-            ...base.output,
+            ...production.output,
             format: 'iife',
             file: 'build/DoubleClick-Kit.js',
             name: 'mpDoubleClickKit',
         },
-        plugins: [...base.plugins]
+        plugins: [...production.plugins]
     },
     {
-        input: base.input,
+        input: production.input,
         output: {
-            ...base.output,
+            ...production.output,
             format: 'iife',
             file: 'dist/DoubleClick-Kit.iife.js',
             name: 'mpDoubleClickKit',
         },
-        plugins: [...base.plugins]
+        plugins: [...production.plugins]
     },
     {
-        input: base.input,
+        input: production.input,
         output: {
-            ...base.output,
+            ...production.output,
             format: 'cjs',
             file: 'dist/DoubleClick-Kit.common.js',
             name: 'mpDoubleClickKit',
         },
-        plugins: [...base.plugins]
+        plugins: [...production.plugins]
     }
 ];
