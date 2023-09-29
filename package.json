@@ -36,6 +36,6 @@
         "watchify": "^3.11.1"
     },
     "dependencies": {
-        "@mparticle/web-kit-wrapper": "^1.0.5"
+        "@mparticle/web-kit-wrapper": "^1.0.6"
     }
 }
