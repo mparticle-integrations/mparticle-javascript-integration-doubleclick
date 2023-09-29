@@ -337,6 +337,28 @@ describe('DoubleClick', function () {
         done();
     });
 
+    it('should not log an event that is not mapped', function(done) {
+        window.dataLayer = [];
+        var result = mParticle.forwarder.process({
+            EventDataType: MessageTypes.PageEvent,
+            EventCategory: mParticle.EventType.Unknown,
+            EventName: 'abcdef',
+            EventAttributes: {
+                'Total Amount': 123,
+                color: 'blue',
+            },
+            CustomFlags: {
+                'DoubleClick.Counter': 'standard',
+            },
+        });
+
+        result.should.equal(
+            'Error logging event or event type not supported on forwarder DoubleclickDFP'
+        );
+
+        done();
+    });
+
     it('should not log a product purchase commerce event without a custom flag or with an incorrect custom flag', function(done) {
         window.dataLayer = [];
 
