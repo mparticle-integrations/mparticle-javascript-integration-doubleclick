@@ -10,7 +10,22 @@ describe('DoubleClick', function () {
             OptOut: 6,
             AppStateTransition: 10,
             Profile: 14,
-            Commerce: 16
+            Commerce: 16,
+        },
+        EventType = {
+            Unknown: 0,
+            Navigation: 1,
+            Location: 2,
+            Search: 3,
+            Transaction: 4,
+            UserContent: 5,
+            UserPreference: 6,
+            Social: 7,
+            Other: 8,
+            Media: 9,
+            getName: function () {
+                return 'blahblah';
+            },
         },
         CommerceEventType = {
             ProductAddToCart: 10,
