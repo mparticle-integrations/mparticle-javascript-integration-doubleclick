@@ -45,9 +45,50 @@ describe('DoubleClick', function () {
         },
         reportService = new ReportingService();
 
-// -------------------DO NOT EDIT ANYTHING ABOVE THIS LINE-----------------------
-// -------------------START EDITING BELOW:-----------------------
-    var DoubleClickMockForwarder = function() {
+    // -------------------DO NOT EDIT ANYTHING ABOVE THIS LINE-----------------------
+    // -------------------START EDITING BELOW:-----------------------
+    // -------------------mParticle stubs - Add any additional stubbing to our methods as needed-----------------------
+    mParticle.Identity = {
+        getCurrentUser: function () {
+            return {
+                getMPID: function () {
+                    return '123';
+                },
+                getAllUserAttributes: function () {
+                    return {};
+                },
+                getUserIdentities: function () {
+                    return {
+                        userIdentities: {
+                            customerid: 'abc',
+                        },
+                    };
+                },
+                getConsentState: function () {
+                    return {
+                        getGDPRConsentState: function () {
+                            return {
+                                some_consent: {
+                                    Consented: false,
+                                    Timestamp: 1,
+                                    Document: 'some_consent',
+                                },
+                                test_consent: {
+                                    Consented: false,
+                                    Timestamp: 1,
+                                    Document: 'test_consent',
+                                },
+                            };
+                        },
+                    };
+                },
+            };
+        },
+    };
+
+    // -------------------DO NOT EDIT ANYTHING ABOVE THIS LINE-----------------------
+    // -------------------START EDITING BELOW:-----------------------
+    var DoubleClickMockForwarder = function () {
         var self = this;
 
         this.trackCustomEventCalled = false;
@@ -446,5 +487,699 @@ describe('DoubleClick', function () {
         window.dataLayer.length.should.equal(0);
 
         done();
+    });
+
+    describe('Consent State', function () {
+        var consentMap = [
+            {
+                jsmap: null,
+                map: 'some_consent',
+                maptype: 'ConsentPurposes',
+                value: 'ad_user_data',
+            },
+            {
+                jsmap: null,
+                map: 'storage_consent',
+                maptype: 'ConsentPurposes',
+                value: 'analytics_storage',
+            },
+            {
+                jsmap: null,
+                map: 'other_test_consent',
+                maptype: 'ConsentPurposes',
+                value: 'ad_storage',
+            },
+            {
+                jsmap: null,
+                map: 'test_consent',
+                maptype: 'ConsentPurposes',
+                value: 'ad_personalization',
+            },
+        ];
+
+        beforeEach(function () {
+            window.dataLayer = [];
+        });
+
+        it('should construct a Default Consent State Payload from Mappings', function (done) {
+            mParticle.forwarder.init(
+                {
+                    conversionId: 'AW-123123123',
+                    consentMappingWeb:
+                        '[{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;some_consent&quot;,&quot;maptype&quot;:&quot;ConsentPurposes&quot;,&quot;value&quot;:&quot;ad_user_data&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;storage_consent&quot;,&quot;maptype&quot;:&quot;ConsentPurposes&quot;,&quot;value&quot;:&quot;analytics_storage&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;other_test_consent&quot;,&quot;maptype&quot;:&quot;ConsentPurposes&quot;,&quot;value&quot;:&quot;ad_storage&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;test_consent&quot;,&quot;maptype&quot;:&quot;ConsentPurposes&quot;,&quot;value&quot;:&quot;ad_personalization&quot;}]',
+                    eventMapping: '[]',
+                    customVariables: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            var expectedDataLayer = [
+                'consent',
+                'default',
+                {
+                    ad_user_data: 'denied',
+                    ad_personalization: 'denied',
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent state should be on the bottom
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayer[2]);
+            done();
+        });
+
+        it('should merge Consent Setting Defaults with User Consent State to construct a Default Consent State', (done) => {
+            mParticle.forwarder.init(
+                {
+                    conversionId: 'AW-123123123',
+                    enableGtag: 'True',
+                    consentMappingWeb: JSON.stringify(consentMap),
+                    defaultAdUserDataConsent: 'Granted', // Will be overriden by User Consent State
+                    defaultAdPersonalizationConsent: 'Granted', // Will be overriden by User Consent State
+                    defaultAdStorageConsentWeb: 'Granted',
+                    defaultAnalyticsStorageConsentWeb: 'Granted',
+                    eventMapping: '[]',
+                    customVariables: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            var expectedDataLayer = [
+                'consent',
+                'default',
+                {
+                    ad_personalization: 'denied', // From User Consent State
+                    ad_user_data: 'denied', // From User Consent State
+                    ad_storage: 'granted', // From Consent Settings
+                    analytics_storage: 'granted', // From Consent Settings
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent state should be on the bottom
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayer[2]);
+
+            done();
+        });
+
+        it('should ignore Unspecified Consent Settings if NOT explicitely defined in Consent State', (done) => {
+            mParticle.forwarder.init(
+                {
+                    conversionId: 'AW-123123123',
+                    enableGtag: 'True',
+                    consentMappingWeb: JSON.stringify(consentMap),
+                    defaultAdUserDataConsent: 'Unspecified',
+                    defaultAdPersonalizationConsent: 'Unspecified', // Will be overriden by User Consent State
+                    defaultAdStorageConsentWeb: 'Unspecified', // Will be overriden by User Consent State
+                    defaultAnalyticsStorageConsentWeb: 'Unspecified',
+                    eventMapping: '[]',
+                    customVariables: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            var expectedDataLayer = [
+                'consent',
+                'default',
+                {
+                    ad_personalization: 'denied', // From User Consent State
+                    ad_user_data: 'denied', // From User Consent State
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent state should be on the bottom
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayer[2]);
+
+            done();
+        });
+
+        it('should construct a Consent State Update Payload when consent changes', (done) => {
+            mParticle.forwarder.init(
+                {
+                    conversionId: 'AW-123123123',
+                    enableGtag: 'True',
+                    consentMappingWeb: JSON.stringify(consentMap),
+                    eventMapping: '[]',
+                    customVariables: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            var expectedDataLayerBefore = [
+                'consent',
+                'update',
+                {
+                    ad_user_data: 'denied',
+                    ad_personalization: 'denied',
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent state should be on the bottom
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayerBefore[2]);
+
+            mParticle.forwarder.process({
+                EventName: 'Test Event',
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: mParticle.EventType.Unknown,
+                EventAttributes: {},
+                ConsentState: {
+                    getGDPRConsentState: function () {
+                        return {
+                            some_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'some_consent',
+                            },
+                            ignored_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'ignored_consent',
+                            },
+                            test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'test_consent',
+                            },
+                        };
+                    },
+
+                    getCCPAConsentState: function () {
+                        return {
+                            data_sale_opt_out: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'some_consent',
+                            },
+                        };
+                    },
+                },
+            });
+
+            var expectedDataLayerAfter = [
+                'consent',
+                'update',
+                {
+                    ad_user_data: 'granted',
+                    ad_personalization: 'granted',
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent Default is index 3
+            // Consent Update is index 4
+            window.dataLayer.length.should.eql(5);
+            window.dataLayer[4][0].should.equal('consent');
+            window.dataLayer[4][1].should.equal('update');
+            window.dataLayer[4][2].should.deepEqual(expectedDataLayerAfter[2]);
+
+            mParticle.forwarder.process({
+                EventName: 'Test Event',
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: mParticle.EventType.Unknown,
+                EventAttributes: {
+                    showcase: 'something',
+                    test: 'thisoneshouldgetmapped',
+                    mp: 'rock',
+                },
+                CustomFlags: {
+                    'DoubleClick.Counter': 'per_session',
+                },
+                ConsentState: {
+                    getGDPRConsentState: function () {
+                        return {
+                            some_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'some_consent',
+                            },
+                            ignored_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'ignored_consent',
+                            },
+                            test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'test_consent',
+                            },
+                            other_test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'other_test_consent',
+                            },
+                            storage_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'storage_consent',
+                            },
+                        };
+                    },
+
+                    getCCPAConsentState: function () {
+                        return {
+                            data_sale_opt_out: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'data_sale_opt_out',
+                            },
+                        };
+                    },
+                },
+            });
+
+            var expectedDataLayerFinal = [
+                'consent',
+                'update',
+                {
+                    ad_personalization: 'granted',
+                    ad_storage: 'granted',
+                    ad_user_data: 'granted',
+                    analytics_storage: 'denied',
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent Default is index 3
+            // Consent Update is index 4
+            // Consent Update #2 is index 5
+            window.dataLayer.length.should.eql(6);
+            window.dataLayer[5][0].should.equal('consent');
+            window.dataLayer[5][1].should.equal('update');
+            window.dataLayer[5][2].should.deepEqual(expectedDataLayerFinal[2]);
+
+            done();
+        });
+
+        it('should construct a Consent State Update Payload with Consent Setting Defaults when consent changes', (done) => {
+            mParticle.forwarder.init(
+                {
+                    conversionId: 'AW-123123123',
+                    enableGtag: 'True',
+                    consentMappingWeb: JSON.stringify(consentMap),
+                    defaultAdUserDataConsent: 'Granted', // Will be overriden by User Consent State
+                    defaultAdPersonalizationConsent: 'Granted', // Will be overriden by User Consent State
+                    defaultAdStorageConsentWeb: 'Granted',
+                    defaultAnalyticsStorageConsentWeb: 'Granted',
+                    eventMapping: '[]',
+                    customVariables: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            var expectedDataLayerBefore = [
+                'consent',
+                'update',
+                {
+                    ad_personalization: 'denied', // From User Consent State
+                    ad_user_data: 'denied', // From User Consent State
+                    ad_storage: 'granted', // From Consent Settings
+                    analytics_storage: 'granted', // From Consent Settings
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent state should be on the bottom
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayerBefore[2]);
+
+            mParticle.forwarder.process({
+                EventName: 'Test Event',
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: mParticle.EventType.Unknown,
+                EventAttributes: {},
+                ConsentState: {
+                    getGDPRConsentState: function () {
+                        return {
+                            some_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'some_consent',
+                            },
+                            ignored_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'ignored_consent',
+                            },
+                            test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'test_consent',
+                            },
+                        };
+                    },
+
+                    getCCPAConsentState: function () {
+                        return {
+                            data_sale_opt_out: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'data_sale_opt_out',
+                            },
+                        };
+                    },
+                },
+            });
+
+            var expectedDataLayerAfter = [
+                'consent',
+                'update',
+                {
+                    ad_personalization: 'granted', // From Event Consent State Change
+                    ad_user_data: 'granted', // From Event Consent State Change
+                    ad_storage: 'granted', // From Consent Settings
+                    analytics_storage: 'granted', // From Consent Settings
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent Default is index 3
+            // Consent Update is index 4
+            window.dataLayer.length.should.eql(5);
+            window.dataLayer[4][0].should.equal('consent');
+            window.dataLayer[4][1].should.equal('update');
+            window.dataLayer[4][2].should.deepEqual(expectedDataLayerAfter[2]);
+
+            mParticle.forwarder.process({
+                EventName: 'Test Event',
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: mParticle.EventType.Unknown,
+                EventAttributes: {
+                    showcase: 'something',
+                    test: 'thisoneshouldgetmapped',
+                    mp: 'rock',
+                },
+                CustomFlags: {
+                    'DoubleClick.Counter': 'per_session',
+                },
+                ConsentState: {
+                    getGDPRConsentState: function () {
+                        return {
+                            some_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'some_consent',
+                            },
+                            ignored_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'ignored_consent',
+                            },
+                            test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'test_consent',
+                            },
+                            other_test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'other_test_consent',
+                            },
+                            storage_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'storage_consent',
+                            },
+                        };
+                    },
+
+                    getCCPAConsentState: function () {
+                        return {
+                            data_sale_opt_out: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'data_sale_opt_out',
+                            },
+                        };
+                    },
+                },
+            });
+
+            var expectedDataLayerFinal = [
+                'consent',
+                'update',
+                {
+                    ad_personalization: 'granted', // From Previous Event State Change
+                    ad_storage: 'granted', // From Previous Event State Change
+                    ad_user_data: 'granted', // From Consent Settings
+                    analytics_storage: 'denied', // From FinalEvent Consent State Change
+                },
+            ];
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent Default is index 3
+            // Consent Update is index 4
+            // Consent Update #2 is index 5
+            window.dataLayer.length.should.eql(6);
+            window.dataLayer[5][0].should.equal('consent');
+            window.dataLayer[5][1].should.equal('update');
+            window.dataLayer[5][2].should.deepEqual(expectedDataLayerFinal[2]);
+            done();
+        });
+
+        it('should NOT construct a Consent State Update Payload if consent DOES NOT change', (done) => {
+            mParticle.forwarder.init(
+                {
+                    conversionId: 'AW-123123123',
+                    enableGtag: 'True',
+                    consentMappingWeb: JSON.stringify(consentMap),
+                    eventMapping: '[]',
+                    customVariables: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            var expectedDataLayerBefore = [
+                'consent',
+                'update',
+                {
+                    ad_user_data: 'denied',
+                    ad_personalization: 'denied',
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent state should be on the bottom
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayerBefore[2]);
+
+            mParticle.forwarder.process({
+                EventName: 'Homepage',
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: EventType.Navigation,
+                EventAttributes: {
+                    showcase: 'something',
+                    test: 'thisoneshouldgetmapped',
+                    mp: 'rock',
+                },
+                ConsentState: {
+                    getGDPRConsentState: function () {
+                        return {
+                            some_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'some_consent',
+                            },
+                            test_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'test_consent',
+                            },
+                        };
+                    },
+                },
+            });
+
+            // There should be no additional consent update events
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayerBefore[2]);
+
+            done();
+        });
+
+        it('should NOT construct any Consent State Payload if consent mappings and settings are undefined', (done) => {
+            mParticle.forwarder.init(
+                {
+                    conversionId: 'AW-123123123',
+                    enableGtag: 'True',
+                    eventMapping: '[]',
+                    customVariables: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent state should be on the bottom
+            window.dataLayer.length.should.eql(3);
+
+            mParticle.forwarder.process({
+                EventName: 'Homepage',
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: EventType.Navigation,
+                EventAttributes: {
+                    showcase: 'something',
+                    test: 'thisoneshouldgetmapped',
+                    mp: 'rock',
+                },
+                ConsentState: {
+                    getGDPRConsentState: function () {
+                        return {
+                            some_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'some_consent',
+                            },
+                            ignored_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'ignored_consent',
+                            },
+                            test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'test_consent',
+                            },
+                            other_test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'other_test_consent',
+                            },
+                            storage_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'storage_consent',
+                            },
+                        };
+                    },
+
+                    getCCPAConsentState: function () {
+                        return {
+                            data_sale_opt_out: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'data_sale_opt_out',
+                            },
+                        };
+                    },
+                },
+            });
+
+            // There should be no additional consent update events
+            // as the consent state is not mapped to any gtag consent settings
+            window.dataLayer.length.should.eql(3);
+
+            done();
+        });
+
+        it('should construct Consent State Payloads if consent mappings is undefined but settings defaults are defined', (done) => {
+            mParticle.forwarder.init(
+                {
+                    conversionId: 'AW-123123123',
+                    enableGtag: 'True',
+                    defaultAdUserDataConsent: 'Granted',
+                    defaultAdPersonalizationConsent: 'Denied',
+                    defaultAdStorageConsentWeb: 'Granted',
+                    defaultAnalyticsStorageConsentWeb: 'Denied',
+                    eventMapping: '[]',
+                    customVariables: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            var expectedDataLayerBefore = [
+                'consent',
+                'default',
+                {
+                    ad_user_data: 'granted',
+                    ad_personalization: 'denied',
+                    ad_storage: 'granted',
+                    analytics_storage: 'denied',
+                },
+            ];
+
+            // Initial elements of Data Layer are setup for gtag.
+            // Consent state should be on the bottom
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayerBefore[2]);
+
+            mParticle.forwarder.process({
+                EventName: 'Homepage',
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: EventType.Navigation,
+                EventAttributes: {
+                    showcase: 'something',
+                    test: 'thisoneshouldgetmapped',
+                    mp: 'rock',
+                },
+                ConsentState: {
+                    getGDPRConsentState: function () {
+                        return {
+                            some_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'some_consent',
+                            },
+                            ignored_consent: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'ignored_consent',
+                            },
+                            test_consent: {
+                                Consented: true,
+                                Timestamp: Date.now(),
+                                Document: 'test_consent',
+                            },
+                        };
+                    },
+
+                    getCCPAConsentState: function () {
+                        return {
+                            data_sale_opt_out: {
+                                Consented: false,
+                                Timestamp: Date.now(),
+                                Document: 'data_sale_opt_out',
+                            },
+                        };
+                    },
+                },
+            });
+
+            // There should be no additional consent update events
+            // as the consent state is not mapped to any gtag consent settings
+            window.dataLayer.length.should.eql(4);
+            window.dataLayer[3][0].should.equal('consent');
+            window.dataLayer[3][1].should.equal('default');
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayerBefore[2]);
+
+            done();
+        });
     });
 });
