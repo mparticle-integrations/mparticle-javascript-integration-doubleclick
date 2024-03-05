@@ -4,6 +4,18 @@ var initialization = {
     initForwarder: function(settings, testMode, userAttributes, userIdentities, processEvent, eventQueue, isInitialized, common) {
         common.settings = settings;
 
+        if (common.settings.consentMappingWeb) {
+            common.consentMappings = parseSettingsString(
+                common.settings.consentMappingWeb
+            );
+        } else {
+            // Ensures consent mappings is an empty array
+            // for future use
+            common.consentMappings = [];
+            common.consentPayloadDefaults = {};
+            common.consentPayloadAsString = '';
+        }
+
         window.dataLayer = window.dataLayer || [];
         if (!testMode) {
             var url = 'https://www.googletagmanager.com/gtag/js?id=' + settings.advertiserId;
@@ -30,13 +42,32 @@ var initialization = {
         } else {
             initializeGoogleDFP(common, settings, isInitialized);
         }
-    }
+
+        common.consentPayloadDefaults =
+            common.consentHandler.getConsentSettings();
+        var initialConsentState = common.consentHandler.getUserConsentState();
+        var defaultConsentPayload =
+            common.consentHandler.generateConsentStatePayloadFromMappings(
+                initialConsentState,
+                common.consentMappings
+            );
+
+        if (!common.isEmpty(defaultConsentPayload)) {
+            common.consentPayloadAsString = JSON.stringify(
+                defaultConsentPayload
+            );
+
+            common.sendGtagConsent('default', defaultConsentPayload);
+        }
+    },
 };
 
 function initializeGoogleDFP(common, settings, isInitialized) {
-    common.eventMapping = JSON.parse(settings.eventMapping.replace(/&quot;/g, '\"'));
+    common.eventMapping = parseSettingsString(settings.eventMapping);
 
-    common.customVariablesMappings = JSON.parse(settings.customVariables.replace(/&quot;/g, '\"')).reduce(function(a, b) {
+    common.customVariablesMappings = parseSettingsString(
+        settings.customVariables
+    ).reduce(function (a, b) {
         a[b.map] = b.value;
         return a;
     }, {});
@@ -44,6 +75,10 @@ function initializeGoogleDFP(common, settings, isInitialized) {
     common.sendGtag('allow_custom_scripts', true, true);
     common.sendGtag('config', settings.advertiserId, true);
     isInitialized = true;
+}
+
+function parseSettingsString(settingsString) {
+    return JSON.parse(settingsString.replace(/&quot;/g, '"'));
 }
 
 module.exports = initialization;
