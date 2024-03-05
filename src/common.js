@@ -1,4 +1,11 @@
-function Common() {}
+var ConsentHandler = require('./consent');
+function Common() {
+    this.consentMappings = [];
+    this.consentPayloadDefaults = {};
+    this.consentPayloadAsString = '';
+
+    this.consentHandler = new ConsentHandler(this);
+}
 
 Common.prototype.eventMapping = {};
 Common.prototype.customVariablesMappings = {};
@@ -37,6 +44,21 @@ Common.prototype.sendGtag = function(type, properties, isInitialization) {
             gtag('event', type, properties);
         }
     }
+};
+
+Common.prototype.sendGtagConsent = function (type, payload) {
+    function gtag() {
+        window.dataLayer.push(arguments);
+    }
+    gtag('consent', type, payload);
+};
+
+Common.prototype.cloneObject = function (obj) {
+    return JSON.parse(JSON.stringify(obj));
+};
+
+Common.prototype.isEmpty = function isEmpty(value) {
+    return value == null || !(Object.keys(value) || value).length;
 };
 
 module.exports = Common;
