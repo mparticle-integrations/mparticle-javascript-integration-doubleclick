@@ -279,7 +279,7 @@ function EventHandler(common) {
     this.common = common || {};
 }
 
-EventHandler.prototype.maybeSendConsentUpdateToGa4 = function (event) {
+EventHandler.prototype.maybeSendConsentUpdateToGoogle = function (event) {
     // If consent payload is empty,
     // we never sent an initial default consent state
     // so we shouldn't send an update.
@@ -306,7 +306,7 @@ EventHandler.prototype.maybeSendConsentUpdateToGa4 = function (event) {
 };
 
 EventHandler.prototype.logEvent = function (event) {
-    this.maybeSendConsentUpdateToGa4(event);
+    this.maybeSendConsentUpdateToGoogle(event);
 
     var gtagProperties = {};
     this.common.setCustomVariables(event, gtagProperties);
