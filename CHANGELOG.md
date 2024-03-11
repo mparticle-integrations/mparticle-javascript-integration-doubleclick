@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.1.0...v2.1.1) (2024-03-11)
+
+
+### Bug Fixes
+
+* Update method name to reflect correct usage ([#46](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/issues/46)) ([e965b00](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/commit/e965b001b8bc60f8756036a713da575fc29e5ff0))
+
 # [2.1.0](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.0.4...v2.1.0) (2024-3-5)
 
 
