@@ -1,6 +1,6 @@
 {
     "name": "@mparticle/web-double-click-kit",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "repository": "https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick",
     "main": "dist/DoubleClick-Kit.common.js",
     "browser": "dist/DoubleClick-Kit.common.js",

@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.1.1...v2.1.2) (2024-04-16)
+
+
+### Bug Fixes
+
+* Set mapped consent name from server to lowercase ([#47](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/issues/47)) ([985ef14](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/commit/985ef146b26ffa951f92efa8a1c3dc6c62241075))
+
 ## [2.1.1](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.1.0...v2.1.1) (2024-03-11)
 
 
