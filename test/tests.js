@@ -567,7 +567,7 @@ describe('DoubleClick', function () {
             done();
         });
 
-        it('should merge Consent Setting Defaults with User Consent State to construct a Default Consent State', (done) => {
+        it('should construct a Default Consent State Payload from Default Settings and construct an Update Consent State Payload from Mappings', (done) => {
             mParticle.forwarder.init(
                 {
                     conversionId: 'AW-123123123',
@@ -584,9 +584,20 @@ describe('DoubleClick', function () {
                 true
             );
 
-            var expectedDataLayer = [
+            var expectedDataLayer1 = [
                 'consent',
                 'default',
+                {
+                    ad_personalization: 'granted', // From Consent Settings
+                    ad_user_data: 'granted', // From Consent Settings
+                    ad_storage: 'granted', // From Consent Settings
+                    analytics_storage: 'granted', // From Consent Settings
+                },
+            ];
+
+            var expectedDataLayer2 = [
+                'consent',
+                'update',
                 {
                     ad_personalization: 'denied', // From User Consent State
                     ad_user_data: 'denied', // From User Consent State
@@ -597,10 +608,13 @@ describe('DoubleClick', function () {
 
             // Initial elements of Data Layer are setup for gtag.
             // Consent state should be on the bottom
-            window.dataLayer.length.should.eql(4);
+            window.dataLayer.length.should.eql(5);
             window.dataLayer[3][0].should.equal('consent');
             window.dataLayer[3][1].should.equal('default');
-            window.dataLayer[3][2].should.deepEqual(expectedDataLayer[2]);
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayer1[2]);
+            window.dataLayer[4][0].should.equal('consent');
+            window.dataLayer[4][1].should.equal('update');
+            window.dataLayer[4][2].should.deepEqual(expectedDataLayer2[2]);
 
             done();
         });
@@ -820,7 +834,18 @@ describe('DoubleClick', function () {
                 true
             );
 
-            var expectedDataLayerBefore = [
+            var expectedDataLayerBefore1 = [
+                'consent',
+                'default',
+                {
+                    ad_personalization: 'granted', // From Consent Settings
+                    ad_user_data: 'granted', // From Consent Settings
+                    ad_storage: 'granted', // From Consent Settings
+                    analytics_storage: 'granted', // From Consent Settings
+                },
+            ];
+
+            var expectedDataLayerBefore2 = [
                 'consent',
                 'update',
                 {
@@ -833,10 +858,13 @@ describe('DoubleClick', function () {
 
             // Initial elements of Data Layer are setup for gtag.
             // Consent state should be on the bottom
-            window.dataLayer.length.should.eql(4);
+            window.dataLayer.length.should.eql(5);
             window.dataLayer[3][0].should.equal('consent');
             window.dataLayer[3][1].should.equal('default');
-            window.dataLayer[3][2].should.deepEqual(expectedDataLayerBefore[2]);
+            window.dataLayer[3][2].should.deepEqual(expectedDataLayerBefore1[2]);
+            window.dataLayer[4][0].should.equal('consent');
+            window.dataLayer[4][1].should.equal('update');
+            window.dataLayer[4][2].should.deepEqual(expectedDataLayerBefore2[2]);
 
             mParticle.forwarder.process({
                 EventName: 'Test Event',
@@ -889,11 +917,11 @@ describe('DoubleClick', function () {
 
             // Initial elements of Data Layer are setup for gtag.
             // Consent Default is index 3
-            // Consent Update is index 4
-            window.dataLayer.length.should.eql(5);
-            window.dataLayer[4][0].should.equal('consent');
-            window.dataLayer[4][1].should.equal('update');
-            window.dataLayer[4][2].should.deepEqual(expectedDataLayerAfter[2]);
+            // Consent Update is index 5
+            window.dataLayer.length.should.eql(6);
+            window.dataLayer[5][0].should.equal('consent');
+            window.dataLayer[5][1].should.equal('update');
+            window.dataLayer[5][2].should.deepEqual(expectedDataLayerAfter[2]);
 
             mParticle.forwarder.process({
                 EventName: 'Test Event',
@@ -962,12 +990,12 @@ describe('DoubleClick', function () {
             ];
             // Initial elements of Data Layer are setup for gtag.
             // Consent Default is index 3
-            // Consent Update is index 4
-            // Consent Update #2 is index 5
-            window.dataLayer.length.should.eql(6);
-            window.dataLayer[5][0].should.equal('consent');
-            window.dataLayer[5][1].should.equal('update');
-            window.dataLayer[5][2].should.deepEqual(expectedDataLayerFinal[2]);
+            // Consent Update is index 5
+            // Consent Update #2 is index 6
+            window.dataLayer.length.should.eql(7);
+            window.dataLayer[6][0].should.equal('consent');
+            window.dataLayer[6][1].should.equal('update');
+            window.dataLayer[6][2].should.deepEqual(expectedDataLayerFinal[2]);
             done();
         });
 
