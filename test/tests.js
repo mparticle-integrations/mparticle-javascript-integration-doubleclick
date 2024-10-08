@@ -857,7 +857,8 @@ describe('DoubleClick', function () {
             ];
 
             // Initial elements of Data Layer are setup for gtag.
-            // Consent state should be on the bottom
+            // Default Consent payload from default settings should be index 3
+            // Update Consent payload from mappings should be on the bottom (index 4)
             window.dataLayer.length.should.eql(5);
             window.dataLayer[3][0].should.equal('consent');
             window.dataLayer[3][1].should.equal('default');
@@ -917,7 +918,8 @@ describe('DoubleClick', function () {
 
             // Initial elements of Data Layer are setup for gtag.
             // Consent Default is index 3
-            // Consent Update is index 5
+            // Initial Consent Update from mappings is index 4
+            // Consent Update #2 is index 5
             window.dataLayer.length.should.eql(6);
             window.dataLayer[5][0].should.equal('consent');
             window.dataLayer[5][1].should.equal('update');
@@ -990,8 +992,9 @@ describe('DoubleClick', function () {
             ];
             // Initial elements of Data Layer are setup for gtag.
             // Consent Default is index 3
-            // Consent Update is index 5
-            // Consent Update #2 is index 6
+            // Initial Consent Update from mappings is index 4
+            // Consent Update #2 is index 5
+            // Consent Update #3 is index 6
             window.dataLayer.length.should.eql(7);
             window.dataLayer[6][0].should.equal('consent');
             window.dataLayer[6][1].should.equal('update');
