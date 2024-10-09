@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.1.2...v2.1.3) (2024-10-09)
+
+
+### Bug Fixes
+
+* send default and update consent payloads on kit init ([#48](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/issues/48)) ([0cd8f36](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/commit/0cd8f36c96789f42f2c9457057d7b31b70f3e990))
+
 ## [2.1.2](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.1.1...v2.1.2) (2024-04-16)
 
 
