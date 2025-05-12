@@ -161,6 +161,7 @@ describe('DoubleClick', function () {
         var sdkSettings = {
             advertiserId: '123456',
             customVariables: '[{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;Total Amount&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;u1&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;color&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;u2&quot;}]',
+            customFieldMappings: '[{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;product_id&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;dc_product_id&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;category&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;dc_category&quot;}]',
             eventMapping: '[{&quot;jsmap&quot;:&quot;-1978027768&quot;,&quot;map&quot;:&quot;-1711833867978608722&quot;,&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;group tag2;activity tag2&quot;},{&quot;jsmap&quot;:&quot;-1107730368&quot;,&quot;map&quot;:&quot;-3234618101041058100&quot;,&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;group tag3;activity tag3&quot;},{&quot;jsmap&quot;:&quot;-1592184962&quot;,&quot;map&quot;:&quot;-4153695833896571372&quot;,&quot;maptype&quot;:&quot;EventClassDetails.Id&quot;,&quot;value&quot;:&quot;group tag4;activity tag4&quot;}]'
         };
         // You may require userAttributes or userIdentities to be passed into initialization
@@ -500,6 +501,34 @@ describe('DoubleClick', function () {
         });
 
         window.dataLayer.length.should.equal(0);
+
+        done();
+    });
+
+    it('should log event with custom field mappings', function(done) {
+        window.dataLayer = [];
+        mParticle.forwarder.process({
+            EventDataType: MessageTypes.PageEvent,
+            EventCategory: mParticle.EventType.Unknown,
+            EventName: 'Test Event',
+            EventAttributes: {
+                'product_id': '12345',
+                'category': 'electronics',
+                'Total Amount': 123,
+                'color': 'blue'
+            },
+            CustomFlags: {
+                'DoubleClick.Counter': 'standard'
+            }
+        });
+        window.dataLayer[0][0].should.equal('event');
+        window.dataLayer[0][1].should.equal('conversion');
+        window.dataLayer[0][2].should.have.property('u1', 123);
+        window.dataLayer[0][2].should.have.property('u2', 'blue');
+        window.dataLayer[0][2].should.have.property('dc_custom_params');
+        window.dataLayer[0][2].dc_custom_params.should.have.property('dc_product_id', '12345');
+        window.dataLayer[0][2].dc_custom_params.should.have.property('dc_category', 'electronics');
+        window.dataLayer[0][2].should.have.property('send_to', 'DC-123456/group tag2/activity tag2+standard');
 
         done();
     });
