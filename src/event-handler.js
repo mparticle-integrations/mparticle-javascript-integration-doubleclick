@@ -18,6 +18,7 @@ EventHandler.prototype.logEvent = function (event) {
 
     var gtagProperties = {};
     this.common.setCustomVariables(event, gtagProperties);
+    this.common.setCustomFields(event, gtagProperties);
     var eventMapping = this.common.getEventMapping(event);
 
     if (!eventMapping) {

@@ -9,7 +9,7 @@ function Common() {
 
 Common.prototype.eventMapping = {};
 Common.prototype.customVariablesMappings = {};
-Common.prototype.customFieldMapings = {};
+Common.prototype.customFieldMappings = {};
 Common.prototype.settings = {};
 Common.prototype.setCustomVariables = function(event, gtagProperties) {
     for (var attribute in event.EventAttributes) {
@@ -20,14 +20,18 @@ Common.prototype.setCustomVariables = function(event, gtagProperties) {
     }
 };
 Common.prototype.setCustomFields = function(event, gtagProperties) {
-    dc_custom_params = {};
+    var dc_custom_params = {};
+    var hasMappings = false;
     for (var attribute in event.EventAttributes) {
-        if (this.customFieldMapings[attribute]) {
-            dc_custom_params[this.customFieldMapings[attribute]] =
+        if (this.customFieldMappings[attribute]) {
+            dc_custom_params[this.customFieldMappings[attribute]] =
                 event.EventAttributes[attribute];
+            hasMappings = true;
         }
     }
-    gtagProperties["dc_custom_params"] = dc_custom_params;
+    if (hasMappings) {
+        gtagProperties["dc_custom_params"] = dc_custom_params;
+    }
 };
 Common.prototype.setSendTo = function(mapping, customFlags, gtagProperties) {
     var tags = mapping.value.split(';');
