@@ -119,6 +119,7 @@ var mpDoubleClickKit = (function (exports) {
 
     Common.prototype.eventMapping = {};
     Common.prototype.customVariablesMappings = {};
+    Common.prototype.customFieldMappings = {};
     Common.prototype.settings = {};
     Common.prototype.setCustomVariables = function(event, gtagProperties) {
         for (var attribute in event.EventAttributes) {
@@ -126,6 +127,20 @@ var mpDoubleClickKit = (function (exports) {
                 gtagProperties[this.customVariablesMappings[attribute]] =
                     event.EventAttributes[attribute];
             }
+        }
+    };
+    Common.prototype.setCustomFields = function(event, gtagProperties) {
+        var dc_custom_params = {};
+        var hasMappings = false;
+        for (var attribute in event.EventAttributes) {
+            if (this.customFieldMappings[attribute]) {
+                dc_custom_params[this.customFieldMappings[attribute]] =
+                    event.EventAttributes[attribute];
+                hasMappings = true;
+            }
+        }
+        if (hasMappings) {
+            gtagProperties["dc_custom_params"] = dc_custom_params;
         }
     };
     Common.prototype.setSendTo = function(mapping, customFlags, gtagProperties) {
@@ -319,6 +334,7 @@ var mpDoubleClickKit = (function (exports) {
 
         var gtagProperties = {};
         this.common.setCustomVariables(event, gtagProperties);
+        this.common.setCustomFields(event, gtagProperties);
         var eventMapping = this.common.getEventMapping(event);
 
         if (!eventMapping) {
@@ -489,6 +505,12 @@ var mpDoubleClickKit = (function (exports) {
 
         common.customVariablesMappings = parseSettingsString(
             settings.customVariables
+        ).reduce(function (a, b) {
+            a[b.map] = b.value;
+            return a;
+        }, {});
+        common.customFieldMappings = parseSettingsString(
+            settings.customParams
         ).reduce(function (a, b) {
             a[b.map] = b.value;
             return a;
