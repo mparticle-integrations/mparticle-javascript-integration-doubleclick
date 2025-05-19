@@ -79,6 +79,12 @@ function initializeGoogleDFP(common, settings, isInitialized) {
         a[b.map] = b.value;
         return a;
     }, {});
+    common.customFieldMappings = parseSettingsString(
+        settings.customParams
+    ).reduce(function (a, b) {
+        a[b.map] = b.value;
+        return a;
+    }, {});
     common.sendGtag('js', new Date(), true);
     common.sendGtag('allow_custom_scripts', true, true);
     common.sendGtag('config', settings.advertiserId, true);

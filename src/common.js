@@ -9,6 +9,7 @@ function Common() {
 
 Common.prototype.eventMapping = {};
 Common.prototype.customVariablesMappings = {};
+Common.prototype.customFieldMappings = {};
 Common.prototype.settings = {};
 Common.prototype.setCustomVariables = function(event, gtagProperties) {
     for (var attribute in event.EventAttributes) {
@@ -16,6 +17,20 @@ Common.prototype.setCustomVariables = function(event, gtagProperties) {
             gtagProperties[this.customVariablesMappings[attribute]] =
                 event.EventAttributes[attribute];
         }
+    }
+};
+Common.prototype.setCustomFields = function(event, gtagProperties) {
+    var dc_custom_params = {};
+    var hasMappings = false;
+    for (var attribute in event.EventAttributes) {
+        if (this.customFieldMappings[attribute]) {
+            dc_custom_params[this.customFieldMappings[attribute]] =
+                event.EventAttributes[attribute];
+            hasMappings = true;
+        }
+    }
+    if (hasMappings) {
+        gtagProperties["dc_custom_params"] = dc_custom_params;
     }
 };
 Common.prototype.setSendTo = function(mapping, customFlags, gtagProperties) {
