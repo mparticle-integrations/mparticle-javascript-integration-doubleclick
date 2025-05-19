@@ -161,7 +161,7 @@ describe('DoubleClick', function () {
         var sdkSettings = {
             advertiserId: '123456',
             customVariables: '[{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;Total Amount&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;u1&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;color&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;u2&quot;}]',
-            customFieldMappings: '[{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;product_id&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;dc_product_id&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;category&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;dc_category&quot;}]',
+            customParams: '[{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;product_id&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;dc_product_id&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;category&quot;,&quot;maptype&quot;:&quot;EventAttributeClass.Name&quot;,&quot;value&quot;:&quot;dc_category&quot;}]',
             eventMapping: '[{&quot;jsmap&quot;:&quot;-1978027768&quot;,&quot;map&quot;:&quot;-1711833867978608722&quot;,&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;group tag2;activity tag2&quot;},{&quot;jsmap&quot;:&quot;-1107730368&quot;,&quot;map&quot;:&quot;-3234618101041058100&quot;,&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;group tag3;activity tag3&quot;},{&quot;jsmap&quot;:&quot;-1592184962&quot;,&quot;map&quot;:&quot;-4153695833896571372&quot;,&quot;maptype&quot;:&quot;EventClassDetails.Id&quot;,&quot;value&quot;:&quot;group tag4;activity tag4&quot;}]'
         };
         // You may require userAttributes or userIdentities to be passed into initialization
@@ -573,6 +573,7 @@ describe('DoubleClick', function () {
                         '[{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;Some_consent&quot;,&quot;maptype&quot;:&quot;ConsentPurposes&quot;,&quot;value&quot;:&quot;ad_user_data&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;Storage_consent&quot;,&quot;maptype&quot;:&quot;ConsentPurposes&quot;,&quot;value&quot;:&quot;analytics_storage&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;Other_test_consent&quot;,&quot;maptype&quot;:&quot;ConsentPurposes&quot;,&quot;value&quot;:&quot;ad_storage&quot;},{&quot;jsmap&quot;:null,&quot;map&quot;:&quot;Test_consent&quot;,&quot;maptype&quot;:&quot;ConsentPurposes&quot;,&quot;value&quot;:&quot;ad_personalization&quot;}]',
                     eventMapping: '[]',
                     customVariables: '[]',
+                    customParams: '[]',
                 },
                 reportService.cb,
                 true
@@ -608,6 +609,7 @@ describe('DoubleClick', function () {
                     defaultAnalyticsStorageConsentWeb: 'Granted',
                     eventMapping: '[]',
                     customVariables: '[]',
+                    customParams: '[]',
                 },
                 reportService.cb,
                 true
@@ -660,6 +662,7 @@ describe('DoubleClick', function () {
                     defaultAnalyticsStorageConsentWeb: 'Unspecified',
                     eventMapping: '[]',
                     customVariables: '[]',
+                    customParams: '[]',
                 },
                 reportService.cb,
                 true
@@ -692,6 +695,7 @@ describe('DoubleClick', function () {
                     consentMappingWeb: JSON.stringify(consentMap),
                     eventMapping: '[]',
                     customVariables: '[]',
+                    customParams: '[]',
                 },
                 reportService.cb,
                 true
@@ -858,6 +862,7 @@ describe('DoubleClick', function () {
                     defaultAnalyticsStorageConsentWeb: 'Granted',
                     eventMapping: '[]',
                     customVariables: '[]',
+                    customParams: '[]',
                 },
                 reportService.cb,
                 true
@@ -1039,6 +1044,7 @@ describe('DoubleClick', function () {
                     consentMappingWeb: JSON.stringify(consentMap),
                     eventMapping: '[]',
                     customVariables: '[]',
+                    customParams: '[]',
                 },
                 reportService.cb,
                 true
@@ -1103,6 +1109,7 @@ describe('DoubleClick', function () {
                     enableGtag: 'True',
                     eventMapping: '[]',
                     customVariables: '[]',
+                    customParams: '[]',
                 },
                 reportService.cb,
                 true
@@ -1182,6 +1189,7 @@ describe('DoubleClick', function () {
                     defaultAnalyticsStorageConsentWeb: 'Denied',
                     eventMapping: '[]',
                     customVariables: '[]',
+                    customParams: '[]',
                 },
                 reportService.cb,
                 true
