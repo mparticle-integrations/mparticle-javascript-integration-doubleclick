@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.1.3...v2.2.0) (2025-05-19)
+
+
+### Features
+
+* Add custom field mapping ([#49](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/issues/49)) ([d7da081](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/commit/d7da08104ad9f3c11c6d4747b4f1af8627debd29))
+
 ## [2.1.3](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.1.2...v2.1.3) (2024-10-09)
 
 
