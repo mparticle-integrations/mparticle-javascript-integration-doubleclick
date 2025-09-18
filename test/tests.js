@@ -1265,4 +1265,96 @@ describe('DoubleClick', function () {
             done();
         });
     });
+
+    describe('Parse Settings String', function () {
+        it('should treat falsy settings as empty mappings', function (done) {
+            mParticle.forwarder.init(
+                {
+                    advertiserId: '123456',
+                    eventMapping: null,
+                    customVariables: null,
+                    customParams: null,
+                },
+                reportService.cb,
+                true
+            );
+
+            window.dataLayer = [];
+
+            const result = mParticle.forwarder.process({
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: mParticle.EventType.Unknown,
+                EventName: 'Test Event',
+                CustomFlags: { 'DoubleClick.Counter': 'standard' },
+            });
+
+            result.should.equal(
+                'Error logging event or event type not supported on forwarder DoubleclickDFP'
+            );
+            window.dataLayer.length.should.equal(0);
+            done();
+        });
+
+        it('should parse arrays with &quot', function (done) {
+            mParticle.forwarder.init(
+                {
+                    advertiserId: '123456',
+                    eventMapping:
+                        '[{&quot;jsmap&quot;:&quot;-1978027768&quot;,&quot;map&quot;:&quot;x&quot;,&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;g;a&quot;}]',
+                    customVariables: '[]',
+                    customParams: '[]',
+                },
+                reportService.cb,
+                true
+            );
+
+            window.dataLayer = [];
+
+            mParticle.forwarder.process({
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: mParticle.EventType.Unknown,
+                EventName: 'Test Event',
+                CustomFlags: { 'DoubleClick.Counter': 'standard' },
+            });
+
+            window.dataLayer[0][0].should.equal('event');
+            window.dataLayer[0][1].should.equal('conversion');
+            window.dataLayer[0][2].should.have.property(
+                'send_to',
+                'DC-123456/g/a+standard'
+            );
+            done();
+        });
+
+        it('should fall back to empty mappings when settings string is invalid', function (done) {
+            mParticle.forwarder.init(
+                {
+                    advertiserId: '123456',
+                    eventMapping:
+                        '[{&quot;jsmap&quot;:&quot;-1978027768&quot;,&quot;map&quot;:&quot;x&quot;,&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;g;a&quot;}]',
+                    customVariables: 'invalid]',
+                    customParams: '[invalid',
+                },
+                reportService.cb,
+                true
+            );
+
+            window.dataLayer = [];
+
+            mParticle.forwarder.process({
+                EventDataType: MessageTypes.PageEvent,
+                EventCategory: mParticle.EventType.Unknown,
+                EventName: 'Test Event',
+                EventAttributes: { 'Total Amount': 123, color: 'blue', product_id: 'p1' },
+                CustomFlags: { 'DoubleClick.Counter': 'standard' },
+            });
+
+            window.dataLayer[0][0].should.equal('event');
+            window.dataLayer[0][1].should.equal('conversion');
+            window.dataLayer[0][2].should.not.have.property('u1');
+            window.dataLayer[0][2].should.not.have.property('u2');
+            window.dataLayer[0][2].should.not.have.property('dc_custom_params');
+            done();
+        });
+    });
 });
