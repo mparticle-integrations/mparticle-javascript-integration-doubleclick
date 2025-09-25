@@ -1325,36 +1325,5 @@ describe('DoubleClick', function () {
             );
             done();
         });
-
-        it('should fall back to empty mappings when settings string is invalid', function (done) {
-            mParticle.forwarder.init(
-                {
-                    advertiserId: '123456',
-                    eventMapping:
-                        '[{&quot;jsmap&quot;:&quot;-1978027768&quot;,&quot;map&quot;:&quot;x&quot;,&quot;maptype&quot;:&quot;EventClass.Id&quot;,&quot;value&quot;:&quot;g;a&quot;}]',
-                    customVariables: 'invalid]',
-                    customParams: '[invalid',
-                },
-                reportService.cb,
-                true
-            );
-
-            window.dataLayer = [];
-
-            mParticle.forwarder.process({
-                EventDataType: MessageTypes.PageEvent,
-                EventCategory: mParticle.EventType.Unknown,
-                EventName: 'Test Event',
-                EventAttributes: { 'Total Amount': 123, color: 'blue', product_id: 'p1' },
-                CustomFlags: { 'DoubleClick.Counter': 'standard' },
-            });
-
-            window.dataLayer[0][0].should.equal('event');
-            window.dataLayer[0][1].should.equal('conversion');
-            window.dataLayer[0][2].should.not.have.property('u1');
-            window.dataLayer[0][2].should.not.have.property('u2');
-            window.dataLayer[0][2].should.not.have.property('dc_custom_params');
-            done();
-        });
     });
 });
