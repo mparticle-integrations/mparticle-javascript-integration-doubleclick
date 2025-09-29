@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.2.0...v2.2.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* updated parseSettingsString in initialization module ([#52](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/issues/52)) ([a90ccca](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/commit/a90ccca0f9cb840d41a53f1de9f398fddc0fbd44))
+
 # [2.2.0](https://github.com/mparticle-integrations/mparticle-javascript-integration-doubleclick/compare/v2.1.3...v2.2.0) (2025-05-19)
 
 
