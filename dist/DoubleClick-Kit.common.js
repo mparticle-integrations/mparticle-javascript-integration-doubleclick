@@ -522,7 +522,15 @@ function initializeGoogleDFP(common, settings, isInitialized) {
 }
 
 function parseSettingsString(settingsString) {
-    return JSON.parse(settingsString.replace(/&quot;/g, '"'));
+    if (!settingsString) {
+        return [];
+    }
+    try {
+        return JSON.parse(settingsString.replace(/&quot;/g, '"'));
+    } catch (error) {
+        console.error('Settings string contains invalid JSON');
+    }
+    return [];
 }
 
 var initialization_1 = initialization;
