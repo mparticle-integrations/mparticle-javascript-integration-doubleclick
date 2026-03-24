@@ -505,6 +505,42 @@ describe('DoubleClick', function () {
         done();
     });
 
+    it('should return false for non-purchase commerce events', function(done) {
+        window.dataLayer = [];
+
+        var result = mParticle.forwarder.process({
+            EventName: 'eCommerce - AddToCart',
+            EventDataType: MessageTypes.Commerce,
+            EventCategory: mParticle.CommerceEventType.ProductAddToCart,
+            ProductAction: {
+                ProductActionType: mParticle.ProductActionType.AddToCart,
+                ProductList: [
+                    {
+                        Sku: '12345',
+                        Name: 'iPhone 6',
+                        Category: 'Phones',
+                        Brand: 'iPhone',
+                        Variant: '6',
+                        Price: 400,
+                        TotalAmount: 400,
+                        CouponCode: 'coupon-code',
+                        Quantity: 1
+                    }
+                ]
+            },
+            CustomFlags: {
+                'DoubleClick.Counter': 'transactions'
+            }
+        });
+
+        result.should.equal(
+            'Error logging event or event type not supported on forwarder DoubleclickDFP'
+        );
+        window.dataLayer.length.should.equal(0);
+
+        done();
+    });
+
     it('should log event with custom field mappings', function(done) {
         window.dataLayer = [];
         mParticle.forwarder.process({
