@@ -53,7 +53,11 @@ CommerceHandler.prototype.logCommerceEvent = function(event) {
             this.common.sendGtag('purchase', gtagProperties);
             return true;
         }
+
+        return false;
     }
+
+    return false;
 };
 
 module.exports = CommerceHandler;
